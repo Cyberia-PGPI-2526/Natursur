@@ -1,0 +1,62 @@
+import { api } from "./api"
+
+export const getUserProfile = async () => {
+    try {
+        const response = await api.get('/users/profile')
+        return response.data
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+export const getUsers = async (page) => {
+    try {
+        const response = await api.get(`/users?page=${page}`)
+        return response.data
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+export const getUser = async (id) => {
+    try {
+        const response = await api.get(`/users/${id}`)
+        return response.data
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+export const updateUser = async (id, data) => {
+    try {
+        console.log(data)
+        const response = await api.put(`/users/${id}`, data)
+        console.log(response)
+        return response.data
+    } catch (error) {
+        console.error(error)
+        if (error.response) {
+            const status = error.response.status
+            const data = error.response.data
+
+            if (status === 400 && data.message) {
+                return { error: data.message }
+            }
+
+            return { error: "Error inesperado" }
+        }
+
+        return { error: "No se pudo conectar con el servidor" }
+    }
+}
+
+
+export const deleteUser = async (id) => {
+    try {
+        const response = await api.delete(`/users/${id}`)
+        console.log(response)
+        return response.data
+    } catch (error) {
+        console.error(error)
+    }
+}
