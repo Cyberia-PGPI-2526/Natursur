@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { getUsers } from "../../service/users.service"
+import { getUsers, deleteUser } from "../../service/users.service"
 
 export default function Users() {
   const navigate = useNavigate()
@@ -38,6 +38,20 @@ export default function Users() {
   const nextPage = () => {
     if (page === totalPages) return
     setPage(page + 1)
+  }
+
+  const handleDelete = async (userId) => {
+    const confirmed = window.confirm("¿Are you sure you want delete this user?")
+    if (!confirmed) return
+
+    const res = await deleteUser(userId)
+
+    if (res.error) {
+      alert("User couldnt be deleted")
+    } else {
+      setUsers(users.filter((user) => user.id !== userId))
+      alert("User deleted succesfully")
+    }
   }
 
   if (isLoading) return <p className="text-center mt-10 text-gray-500">Cargando usuarios...</p>
@@ -80,7 +94,9 @@ export default function Users() {
                     className="bg-yellow-400 text-white px-3 py-1 rounded hover:bg-yellow-500 transition">
                     Edit
                   </button>
-                  <button className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition">
+                  <button
+                    onClick={() => handleDelete(user.id)}
+                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition">
                     Delete
                   </button>
                 </td>
@@ -91,7 +107,7 @@ export default function Users() {
       </div>
       <div className="flex flex-row justify-center mt-4 gap-4 p-4">
         <button
-           className="bg-blue-500 hover:bg-blue-600 rounded px-4 py-3 font-semibold text-xl disabled:bg-gray-500"
+          className="bg-blue-500 hover:bg-blue-600 rounded px-4 py-3 font-semibold text-xl disabled:bg-gray-500"
           onClick={prevPage}
           disabled={page <= 1}
         >

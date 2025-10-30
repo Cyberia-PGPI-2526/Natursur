@@ -6,6 +6,8 @@ import { updateUserValidation } from "./user.validation.js"
 
 export const userRoutes = Router()
 
+
+
 userRoutes.get("/", 
     requiresAuth,
     checkRole("ADMIN"),
@@ -28,6 +30,6 @@ userRoutes.delete("/:id",
     checkRole("ADMIN"),
     deleteUser)
 
-userRoutes.get("/profile", 
+userRoutes.get("/me/profile", 
     requiresAuth,
     getProfile)

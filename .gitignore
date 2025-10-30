@@ -1,6 +1,9 @@
 # Node modules
 node_modules/
 
+# migrations
+/migrations
+
 # Environment variables
 .env
 .env.local
@@ -39,4 +42,8 @@ build/
 *.tgz
 
 # Dev db
-.db
+*.db
+
+*sql
+
+*.toml

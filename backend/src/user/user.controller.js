@@ -3,6 +3,7 @@ import { prisma } from "../config/db.js"
 export async function getProfile(req, res) {
   try {
     const userId = req.user.userId
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -131,6 +132,12 @@ export async function updateUser(req, res) {
 export async function deleteUser(req, res) {
   try {
     const userId = req.params.id
+
+    if(parseInt(userId) === req.user.userId) return res.status(400).json({ message: "Can't delete" })
+
+    await prisma.refreshToken.delete({
+      where: { userId: parseInt(userId) }
+    })
 
     await prisma.user.delete({
       where: { id: parseInt(userId) }

@@ -2,7 +2,7 @@ import { api } from "./api"
 
 export const getUserProfile = async () => {
     try {
-        const response = await api.get('/users/profile')
+        const response = await api.get('/users/me/profile')
         return response.data
     } catch (error) {
         console.error(error)
@@ -57,6 +57,9 @@ export const deleteUser = async (id) => {
         console.log(response)
         return response.data
     } catch (error) {
+        if(error.response.status === 400) {
+            return { error: true }
+        }
         console.error(error)
     }
 }
