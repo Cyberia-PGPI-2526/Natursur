@@ -1,0 +1,52 @@
+/* Fondo del calendario */
+.calendar-custom {
+  border: none;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Cabecera de mes */
+.react-calendar__navigation {
+  background-color: #009BA6;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.react-calendar__navigation button {
+  color: white;
+  font-weight: bold;
+  min-width: 44px;
+  margin: 2px;
+}
+
+.react-calendar__month-view__days__day {
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+
+/* Hover sobre días */
+.react-calendar__tile:hover {
+  background-color: #ccf2f5;
+  color: #009BA6;
+}
+
+/* Día seleccionado */
+.react-calendar__tile--active {
+  background-color: #009BA6;
+  color: white;
+  border-radius: 0.5rem;
+}
+
+/* Día actual */
+.react-calendar__tile--now {
+  border: 1px solid #009BA6;
+  border-radius: 0.5rem;
+}
+
+/* Responsive: reduce tamaño en móvil */
+@media (max-width: 768px) {
+  .react-calendar {
+    font-size: 0.85rem;
+  }
+}
