@@ -31,10 +31,10 @@ export default function Navbar() {
 
   switch (role) {
     case "ADMIN":
-      adminRoutes = <NavLink className={linkClass} to="/users" onClick={() => setIsOpen(false)}>Users</NavLink>
+      adminRoutes = <NavLink className={linkClass} to="/users" onClick={() => setIsOpen(false)}>Usuarios</NavLink>
       break
     case "CUSTOMER":
-      customerRoutes = <NavLink className={linkClass} to="/reservations" onClick={() => setIsOpen(false)}>Reservations</NavLink>
+      customerRoutes = <NavLink className={linkClass} to="/reservations" onClick={() => setIsOpen(false)}>Reservas</NavLink>
       break
     default:
       break
@@ -45,14 +45,14 @@ export default function Navbar() {
       <>
         <NavLink className={linkClass} to="/" onClick={() => setIsOpen(false)}>Inicio</NavLink>
         <NavLink className={linkClass} to="/login" onClick={() => setIsOpen(false)}>Login</NavLink>
-        <NavLink className={linkClass} to="/register" onClick={() => setIsOpen(false)}>Register</NavLink>
+        <NavLink className={linkClass} to="/register" onClick={() => setIsOpen(false)}>Registro</NavLink>
       </>
     )
   } else {
     privateRoutes = (
       <>
         <NavLink className={linkClass} to="/" onClick={() => setIsOpen(false)}>Inicio</NavLink>
-        <NavLink className={linkClass} to="/profile" onClick={() => setIsOpen(false)}>Profile</NavLink>
+        <NavLink className={linkClass} to="/profile" onClick={() => setIsOpen(false)}>Perfil</NavLink>
         <button
           onClick={handleLogout}
           className="px-4 py-2 bg-[#009BA6] text-white rounded hover:bg-[#00777F] transition"

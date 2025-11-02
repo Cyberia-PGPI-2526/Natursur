@@ -55,7 +55,7 @@ export default function Login() {
 
         {/* Password con botón dentro */}
         <div className="flex flex-col">
-          <label htmlFor="password" className="mb-2 font-medium text-gray-700">Password</label>
+          <label htmlFor="password" className="mb-2 font-medium text-gray-700">Contraseña</label>
           <div className="relative w-full">
             <input
               {...register("password")}

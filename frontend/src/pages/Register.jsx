@@ -41,7 +41,7 @@ export default function Register() {
         </div>
 
         <div className="flex flex-col w-full">
-          <label htmlFor="password" className="mb-2 font-medium text-gray-700" >Password</label>
+          <label htmlFor="password" className="mb-2 font-medium text-gray-700" >Contraseña</label>
           <input
             onChange={handleChange}
             type="password"
@@ -54,7 +54,11 @@ export default function Register() {
 
         <button type="button" onClick={showPassword}>Ver contraseña</button>
 
-        <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition-colors duration-200" type="submit">Login</button>
+        <button
+          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition-colors duration-200"
+          type="submit">
+          Registro
+        </button>
 
       </form>
     </div>
