@@ -16,7 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^6.17.1",
+    "@prisma/client": "^6.18.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -28,6 +28,6 @@
   },
   "devDependencies": {
     "artillery": "^2.0.26",
-    "prisma": "^6.17.1"
+    "prisma": "^6.18.0"
   }
 }
