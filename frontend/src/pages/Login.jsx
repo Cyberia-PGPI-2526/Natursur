@@ -7,7 +7,7 @@ import { loginUser } from "../service/auth.service"
 import { useAuthStore } from "../store/authStore"
 
 const schema = z.object({
-  email: z.string().email('Email inválido'),
+  email: z.email('Email inválido'),
   password: z.string()
 })
 
