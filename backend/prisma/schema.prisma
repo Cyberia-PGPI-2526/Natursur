@@ -12,8 +12,10 @@ model User {
   name          String  
   email         String  @unique  
   password      String
+  telefono      String?
   role          Role
   refreshTokens RefreshToken?
+  citas_cliente   Cita[]         @relation("ClienteCitas")
 }
 
 model RefreshToken {
@@ -29,4 +31,57 @@ model RefreshToken {
 enum Role {
   ADMIN
   CUSTOMER
+}
+
+model Tratamiento { 
+  id                Int      @id @default(autoincrement())
+  nombre            String   @unique
+  descripcion       String?
+  duracion_minutos  Int      
+  precio_cents      Int      @default(0)
+  
+  citas Cita[]
+}
+
+model Disponibilidad {
+  id             Int      @id @default(autoincrement())
+  dia_semana     DiaSemana
+  hora_inicio    DateTime
+  hora_fin       DateTime
+  
+  @@unique([dia_semana]) 
+}
+
+enum DiaSemana {
+  LUNES
+  MARTES
+  MIERCOLES
+  JUEVES
+  VIERNES
+  SABADO
+  DOMINGO
+}
+
+model Cita {
+  id             Int      @id @default(autoincrement())
+  fecha_cita     DateTime
+  hora_inicio    DateTime
+  hora_fin       DateTime  
+  estado         EstadoCita @default(PENDIENTE)
+
+  cliente        User     @relation("ClienteCitas", fields: [clienteId], references: [id])
+  clienteId      Int
+  
+  tratamiento    Tratamiento @relation(fields: [tratamientoId], references: [id])
+  tratamientoId  Int
+
+  @@unique([fecha_cita, hora_inicio, clienteId]) 
+}
+
+enum EstadoCita {
+  PENDIENTE
+  CONFIRMADA
+  CANCELADA
+  COMPLETADA
+  NO_ASISTIDA
 }
