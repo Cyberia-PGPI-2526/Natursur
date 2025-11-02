@@ -8,14 +8,14 @@ datasource db {
 }
 
 model User {  
-  id            Int     @id @default(autoincrement())  
-  name          String  
-  email         String  @unique  
-  password      String
-  telefono      String?
-  role          Role
+  id              Int            @id @default(autoincrement())  
+  name            String  
+  email           String         @unique  
+  password        String
+  phone_number    String?
+  role            Role
   refreshTokens RefreshToken?
-  citas_cliente   Cita[]         @relation("ClienteCitas")
+  appointments    Appointment[]  @relation("ClientAppointments") 
 }
 
 model RefreshToken {
@@ -25,7 +25,6 @@ model RefreshToken {
   expiresAt DateTime
   user      User     @relation(fields: [userId], references: [id])
   userId    Int      @unique
-  
 }
 
 enum Role {
@@ -33,55 +32,55 @@ enum Role {
   CUSTOMER
 }
 
-model Tratamiento { 
+model Service {
   id                Int      @id @default(autoincrement())
-  nombre            String   @unique
-  descripcion       String?
-  duracion_minutos  Int      
-  precio_cents      Int      @default(0)
+  name              String   @unique
+  description       String?
+  duration_minutes  Int      
+  price_cents       Int      @default(0) 
   
-  citas Cita[]
+  appointments Appointment[]
 }
 
-model Disponibilidad {
-  id             Int      @id @default(autoincrement())
-  dia_semana     DiaSemana
-  hora_inicio    DateTime
-  hora_fin       DateTime
+model Availability {
+  id          Int      @id @default(autoincrement())
+  week_day    WeekDay
+  start_time  DateTime
+  end_time    DateTime
+
+  @@unique([week_day])
+}
+
+enum WeekDay {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+model Appointment {
+  id                Int                  @id @default(autoincrement())
+  appointment_date  DateTime
+  start_time        DateTime
+  end_time          DateTime
+  state             AppointmentState     @default(PENDING) 
+
+  client            User     @relation("ClientAppointments", fields: [clientId], references: [id])
+  clientId          Int
   
-  @@unique([dia_semana]) 
-}
+  service           Service @relation(fields: [serviceId], references: [id])
+  serviceId         Int
 
-enum DiaSemana {
-  LUNES
-  MARTES
-  MIERCOLES
-  JUEVES
-  VIERNES
-  SABADO
-  DOMINGO
-}
+  @@unique([appointment_date, start_time, clientId])
+} 
 
-model Cita {
-  id             Int      @id @default(autoincrement())
-  fecha_cita     DateTime
-  hora_inicio    DateTime
-  hora_fin       DateTime  
-  estado         EstadoCita @default(PENDIENTE)
-
-  cliente        User     @relation("ClienteCitas", fields: [clienteId], references: [id])
-  clienteId      Int
-  
-  tratamiento    Tratamiento @relation(fields: [tratamientoId], references: [id])
-  tratamientoId  Int
-
-  @@unique([fecha_cita, hora_inicio, clienteId]) 
-}
-
-enum EstadoCita {
-  PENDIENTE
-  CONFIRMADA
-  CANCELADA
-  COMPLETADA
-  NO_ASISTIDA
+enum AppointmentState {
+  PENDING
+  CONFIRMED
+  CANCELED
+  COMPLETED
+  NOT_ASSISTED
 }
