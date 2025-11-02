@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom' 
 import Home from './pages/Home'
 import Navbar from './components/Navbar'
 import Login from './pages/Login'
@@ -11,9 +11,7 @@ import User from './pages/admin/User'
 import { useEffect } from 'react'
 import { refreshToken } from './service/auth.service'
 
-
 function App() {
-
   const { token, role } = useAuthStore()
 
   useEffect(() => {
@@ -61,9 +59,9 @@ function App() {
   }
 
   return (
-    <div>
+    <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar />
-      <main className='mx-auto min-h-dvh flex flex-col'>
+      <main className='flex-1 mx-auto w-full max-w-7xl px-4 py-6 md:px-8 lg:px-16'>
         <Routes>
           <Route path='/' element={<Home />} />
           {adminRoutes}
