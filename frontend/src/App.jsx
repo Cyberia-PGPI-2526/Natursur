@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom' 
+import { Route, Routes } from 'react-router-dom'
 import Home from './pages/Home'
 import Navbar from './components/Navbar'
 import Login from './pages/Login'
@@ -10,6 +10,8 @@ import Users from './pages/admin/Users'
 import User from './pages/admin/User'
 import { useEffect } from 'react'
 import { refreshToken } from './service/auth.service'
+import AppCalendar from './pages/customer/Calendar'
+import Availability from './pages/customer/Availability'
 
 function App() {
   const { token, role } = useAuthStore()
@@ -53,7 +55,9 @@ function App() {
   } else {
     privateRoutes = (
       <>
+        <Route path='/calendar' element={<PrivateRoute><AppCalendar /></PrivateRoute>} />
         <Route path='/profile' element={<PrivateRoute><Profile /></PrivateRoute>} />
+        <Route path="/availability/:date" element={<PrivateRoute><Availability /></PrivateRoute>} />
       </>
     )
   }
