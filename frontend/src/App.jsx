@@ -8,7 +8,8 @@ import PrivateRoute from './components/PrivateRoute'
 import { useAuthStore } from './store/authStore'
 import Users from './pages/admin/Users'
 import User from './pages/admin/User'
-import Services from './pages/admin/Services'
+import AdminServices from './pages/admin/Services'
+import CustomerServices from './pages/Services'
 import { useEffect, useState } from 'react'
 import { refreshToken } from './service/auth.service'
 import AppCalendar from './pages/customer/Calendar'
@@ -37,13 +38,14 @@ function App() {
         <>
           <Route path='/users' element={<PrivateRoute><Users /></PrivateRoute>} />
           <Route path='/users/:id' element={<PrivateRoute><User /></PrivateRoute>} />
-          <Route path='/services' element={<PrivateRoute><Services /></PrivateRoute>} />
+          <Route path='/services' element={<PrivateRoute><AdminServices /></PrivateRoute>} />
         </>
       )
       break
     case "CUSTOMER":
       customerRoutes = (
         <>
+          <Route path='/services' element={<PrivateRoute><CustomerServices /></PrivateRoute>} />
           <Route path='/reservations' element={<PrivateRoute><Login /></PrivateRoute>} />
         </>
       )
