@@ -8,7 +8,8 @@ import PrivateRoute from './components/PrivateRoute'
 import { useAuthStore } from './store/authStore'
 import Users from './pages/admin/Users'
 import User from './pages/admin/User'
-import { useEffect } from 'react'
+import Services from './pages/admin/Services'
+import { useEffect, useState } from 'react'
 import { refreshToken } from './service/auth.service'
 import AppCalendar from './pages/customer/Calendar'
 import Availability from './pages/customer/Availability'
@@ -16,9 +17,14 @@ import MyAppointments from './pages/customer/MyAppointments'
 
 function App() {
   const { token, role } = useAuthStore()
+  const [isAuthReady, setIsAuthReady] = useState(false)
 
   useEffect(() => {
-    refreshToken()
+    const initAuth = async () => {
+      await refreshToken()
+      setIsAuthReady(true)
+    }
+    initAuth()
   }, [])
 
   let publicRoutes = <></>
@@ -32,6 +38,7 @@ function App() {
         <>
           <Route path='/users' element={<PrivateRoute><Users /></PrivateRoute>} />
           <Route path='/users/:id' element={<PrivateRoute><User /></PrivateRoute>} />
+          <Route path='/services' element={<PrivateRoute><Services /></PrivateRoute>} />
         </>
       )
       break
@@ -60,6 +67,14 @@ function App() {
         <Route path='/profile' element={<PrivateRoute><Profile /></PrivateRoute>} />
         <Route path="/availability/:date" element={<PrivateRoute><Availability /></PrivateRoute>} />
       </>
+    )
+  }
+
+  if (!isAuthReady) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-xl text-[#009BA6]">Cargando...</div>
+      </div>
     )
   }
 
