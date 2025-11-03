@@ -1,14 +1,35 @@
 import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { getUsers, deleteUser } from "../../service/users.service"
+import { getUsers, deleteUser, getUser, updateUser } from "../../service/users.service"
+import Toast from "../../components/Toast"
+import Modal from "../../components/Modal"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+
+const schema = z.object({
+    name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
+    email: z.string().email("Email inválido"),
+    role: z.enum(["ADMIN", "CUSTOMER"], { errorMap: () => ({ message: "Rol inválido" }) }),
+    password: z.string().optional().or(z.literal("")).refine(
+        (val) => val === "" || val.length >= 4,
+        { message: "La contraseña debe tener al menos 4 caracteres" }
+    )
+})
 
 export default function Users() {
-  const navigate = useNavigate()
 
   const [users, setUsers] = useState([])
   const [page, setPage] = useState(null)
   const [totalPages, setTotalPages] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [toast, setToast] = useState(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingUser, setEditingUser] = useState(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const { register, handleSubmit, formState: { errors }, reset } = useForm({
+    resolver: zodResolver(schema),
+  })
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -41,87 +62,254 @@ export default function Users() {
   }
 
   const handleDelete = async (userId) => {
-    const confirmed = window.confirm("¿Are you sure you want delete this user?")
+    const confirmed = window.confirm("¿Estás seguro de que quieres eliminar este usuario?")
     if (!confirmed) return
 
     const res = await deleteUser(userId)
 
     if (res.error) {
-      alert("User couldnt be deleted")
+      setToast({ message: "No se pudo eliminar el usuario", type: "error" })
     } else {
       setUsers(users.filter((user) => user.id !== userId))
-      alert("User deleted succesfully")
+      setToast({ message: "Usuario eliminado exitosamente", type: "success" })
     }
   }
 
-  if (isLoading) return <p className="text-center mt-10 text-gray-500">Cargando usuarios...</p>
-  if (!users.length) return <p className="text-center mt-10 text-red-500">No se encontraron usuarios.</p>
+  const handleEdit = async (user) => {
+    setEditingUser(user)
+    const res = await getUser(user.id)
+    reset({
+      name: res.name,
+      email: res.email,
+      role: res.role,
+      password: ""
+    })
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    if (!isSubmitting) {
+      setIsModalOpen(false)
+      setEditingUser(null)
+      reset()
+    }
+  }
+
+  const onSubmit = async (data) => {
+    setIsSubmitting(true)
+    
+    const res = await updateUser(editingUser.id, data)
+
+    setIsSubmitting(false)
+
+    if (res.error) {
+      setToast({ message: res.error, type: "error" })
+      return
+    }
+
+    setToast({ message: "Usuario actualizado exitosamente", type: "success" })
+    setIsModalOpen(false)
+    setEditingUser(null)
+    
+    // Refresh users list
+    const currentPage = page || 1
+    const refreshRes = await getUsers(currentPage)
+    setUsers(refreshRes.users || [])
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="text-xl text-[#009BA6]">Cargando usuarios...</div>
+      </div>
+    )
+  }
+
+  if (!users.length) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="text-xl text-gray-500">No se encontraron usuarios.</div>
+      </div>
+    )
+  }
 
   return (
-    <div className="p-6 min-h-[70vh]">
-      <h1 className="text-3xl font-semibold text-blue-600 mb-6">Usuarios</h1>
-
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
-          <thead className="bg-blue-500 text-white">
-            <tr>
-              <th className="py-3 px-6 text-left">#</th>
-              <th className="py-3 px-6 text-left">Nombre</th>
-              <th className="py-3 px-6 text-left">Email</th>
-              <th className="py-3 px-6 text-left">Rol</th>
-              <th className="py-3 px-6 text-center">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user, index) => (
-              <tr key={user.id} className="border-b hover:bg-gray-50 transition">
-                <td className="py-3 px-6">{index + 1}</td>
-                <td className="py-3 px-6">{user.name}</td>
-                <td className="py-3 px-6">{user.email}</td>
-                <td className="py-3 px-6">
-                  <span
-                    className={`px-2 py-1 rounded-full text-sm font-medium ${user.role === "ADMIN"
-                      ? "bg-blue-500 text-white"
-                      : "bg-green-100 text-green-700"
-                      }`}
-                  >
-                    {user.role}
-                  </span>
-                </td>
-                <td className="py-3 px-6 text-center flex justify-center gap-2">
-                  <button
-                    onClick={() => navigate(`/users/${user.id}`)}
-                    className="bg-yellow-400 text-white px-3 py-1 rounded hover:bg-yellow-500 transition">
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(user.id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition">
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-[#009BA6]">Gestión de Usuarios</h1>
+        <p className="text-gray-600 mt-2">Administra los usuarios del sistema</p>
       </div>
-      <div className="flex flex-row justify-center mt-4 gap-4 p-4">
+
+      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
+            <thead className="bg-[#009BA6] text-white">
+              <tr>
+                <th className="py-4 px-6 text-left font-semibold">#</th>
+                <th className="py-4 px-6 text-left font-semibold">Nombre</th>
+                <th className="py-4 px-6 text-left font-semibold">Email</th>
+                <th className="py-4 px-6 text-left font-semibold">Rol</th>
+                <th className="py-4 px-6 text-center font-semibold">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {users.map((user, index) => (
+                <tr key={user.id} className="hover:bg-gray-50 transition">
+                  <td className="py-4 px-6 text-gray-700">{(page - 1) * 10 + index + 1}</td>
+                  <td className="py-4 px-6 text-gray-900 font-medium">{user.name}</td>
+                  <td className="py-4 px-6 text-gray-700">{user.email}</td>
+                  <td className="py-4 px-6">
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                        user.role === "ADMIN"
+                          ? "bg-[#009BA6] text-white"
+                          : "bg-green-100 text-green-700"
+                      }`}
+                    >
+                      {user.role}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex justify-center gap-2">
+                      <button
+                        onClick={() => handleEdit(user)}
+                        className="bg-[#009BA6] text-white px-4 py-2 rounded-lg hover:bg-[#007a82] transition font-medium"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => handleDelete(user.id)}
+                        className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition font-medium"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Paginación */}
+      <div className="flex justify-center items-center mt-8 gap-4">
         <button
-          className="bg-blue-500 hover:bg-blue-600 rounded px-4 py-3 font-semibold text-xl disabled:bg-gray-500"
+          className="px-6 py-3 bg-[#009BA6] text-white rounded-lg hover:bg-[#007a82] transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={prevPage}
           disabled={page <= 1}
         >
-          prev
+          ← Anterior
         </button>
-        <p className="text-2xl font-semibold px-4 py-4">{page}/{totalPages}</p>
+        <span className="text-lg font-semibold text-gray-700">
+          Página {page} de {totalPages}
+        </span>
         <button
-          className="bg-blue-500 hover:bg-blue-600 rounded px-4 py-3 font-semibold text-xl disabled:bg-gray-500"
+          className="px-6 py-3 bg-[#009BA6] text-white rounded-lg hover:bg-[#007a82] transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={nextPage}
           disabled={page === totalPages}
         >
-          next
+          Siguiente →
         </button>
       </div>
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
+      <Modal isOpen={isModalOpen} onClose={handleCloseModal} title="Editar Usuario">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+              Nombre *
+            </label>
+            <input
+              {...register("name")}
+              type="text"
+              id="name"
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#009BA6] border-gray-300"
+              disabled={isSubmitting}
+            />
+            {errors.name && (
+              <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              Email *
+            </label>
+            <input
+              {...register("email")}
+              type="email"
+              id="email"
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#009BA6] border-gray-300"
+              disabled={isSubmitting}
+            />
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+              Rol *
+            </label>
+            <select
+              {...register("role")}
+              id="role"
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#009BA6] border-gray-300"
+              disabled={isSubmitting}
+            >
+              <option value="CUSTOMER">Cliente</option>
+              <option value="ADMIN">Administrador</option>
+            </select>
+            {errors.role && (
+              <p className="text-red-500 text-sm mt-1">{errors.role.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              Contraseña
+            </label>
+            <input
+              {...register("password")}
+              type="password"
+              id="password"
+              placeholder="Dejar en blanco para mantener la actual"
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#009BA6] border-gray-300"
+              disabled={isSubmitting}
+            />
+            {errors.password && (
+              <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+            )}
+            <p className="text-gray-500 text-xs mt-1">Solo completa si deseas cambiar la contraseña</p>
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={handleCloseModal}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+              disabled={isSubmitting}
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="flex-1 px-4 py-2 bg-[#009BA6] text-white rounded-lg hover:bg-[#007a82] transition disabled:opacity-50"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   )
 }
