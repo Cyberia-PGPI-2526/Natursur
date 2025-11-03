@@ -47,5 +47,3 @@ serviceRoutes.delete("/:id",
   handleValidation,
   deleteService
 )
-
-export default serviceRoutes
