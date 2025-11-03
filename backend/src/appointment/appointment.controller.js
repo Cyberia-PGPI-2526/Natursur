@@ -1,90 +1,100 @@
 import { prisma } from "../config/db.js"
 
 export async function getMyAppointments(req, res) {
-  try {
-    const userId = req.user.userId
-    let { page = 1, limit = 10 } = req.query
-    page = parseInt(page)
-    limit = parseInt(limit)
-    const skip = (page - 1) * limit
+    try {
+        console.log("corre my appointments")
+        const userId = req.user.userId
+        let { page = 1, limit = 10 } = req.query
+        page = parseInt(page)
+        limit = parseInt(limit)
+        const skip = (page - 1) * limit
 
-    const [appointments, total] = await Promise.all([
-      prisma.appointment.findMany({
-        where: { userId },
-        skip,
-        take: limit,
-        include: {
-          client: {
-            select: { id: true, name: true, email: true }
-          },
-          service: {
-            select: { id: true, name: true, duration_minutes: true, price_cents: true }
-          }
-        },
-        orderBy: {
-          appointment_date: 'desc'
-        }
-      }),
-      prisma.appointment.count({ where: { userId } })
-    ])
+        const [appointments, total] = await Promise.all([
+            prisma.appointment.findMany({
+                where: { clientId: userId },
+                skip,
+                take: limit,
+                include: {
+                    client: {
+                        select: { id: true, name: true, email: true }
+                    },
+                    service: {
+                        select: { id: true, name: true }
+                    }
+                },
+                orderBy: {
+                    appointment_date: 'desc'
+                }
+            }),
+            prisma.appointment.count({ where: { clientId: userId } })
+        ])
 
-    return res.json({
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-      appointments
-    })
-  } catch (error) {
-    console.error(error)
-    return res.status(500).json({ message: "Server error" })
-  }
+        return res.json({
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+            appointments
+        })
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({ message: "Server error" })
+    }
 }
 
 export async function getAppointments(req, res) {
-  try {
-    let { page = 1, limit = 10 } = req.query
-    page = parseInt(page)
-    limit = parseInt(limit)
-    const skip = (page - 1) * limit
+    try {
+        let { page = 1, limit = 10, clientId, state } = req.query
+        page = parseInt(page)
+        limit = parseInt(limit)
+        const skip = (page - 1) * limit
 
-    const [appointments, total] = await Promise.all([
-      prisma.appointment.findMany({
-        skip,
-        take: limit,
-        include: {
-          client: {
-            select: { id: true, name: true, email: true }
-          },
-          service: {
-            select: { id: true, name: true, duration_minutes: true, price_cents: true }
-          }
-        },
-        orderBy: {
-          appointment_date: 'desc'
+        const where = {}
+        if (clientId) {
+            where.clientId = parseInt(clientId)
         }
-      }),
-      prisma.appointment.count({ where: { userId } })
-    ])
+        if (state) {
+            where.state = state.toUpperCase()
+        }
+        
+        const [appointments, total] = await Promise.all([
+            prisma.appointment.findMany({
+                where,
+                skip,
+                take: limit,
+                include: {
+                    client: {
+                        select: { id: true, name: true, email: true }
+                    },
+                    service: {
+                        select: { id: true, name: true, duration_minutes: true, price_cents: true }
+                    }
+                },
+                orderBy: {
+                    appointment_date: 'desc'
+                }
+            }),
+            prisma.appointment.count({ where })
+        ])
 
-    return res.json({
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-      appointments
-    })
-  } catch (error) {
-    console.error(error)
-    return res.status(500).json({ message: "Server error" })
-  }
+        return res.json({
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+            appointments
+        })
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({ message: "Server error" })
+    }
 }
 
 export async function getAppointment(req, res) {
     try {
         const appointmentId = parseInt(req.params.id)
         const loggedInUserId = req.user.userId
-        const loggedInUserRole = req.user.role // Asumo que el rol está en req.user
+        const loggedInUserRole = req.user.role
 
         const appointment = await prisma.appointment.findUnique({
             where: { id: appointmentId },
@@ -109,31 +119,33 @@ export async function getAppointment(req, res) {
     }
 }
 
-
 export async function createAppointment(req, res) {
-  try {
-    const userId = req.user.userId
-    const { appointment_date, start_time, end_time, serviceId } = req.body
+    try {
+        const userId = req.user.userId
+        const { appointment_date, start_time, end_time, serviceId, session_type } = req.body
 
-    const apptDate = new Date(appointment_date)
-    const startTime = new Date(start_time)
-    const endTime = new Date(end_time)
+        const newAppointment = await prisma.appointment.create({
+            data: {
+                appointment_date: new Date(appointment_date),
+                start_time: new Date(start_time),
+                end_time: new Date(end_time),
+                clientId: userId,
+                serviceId: parseInt(serviceId),
+                session_type: session_type.toUpperCase()
+            }
+        })
 
-    const newAppointment = await prisma.appointment.create({
-      data: {
-        appointment_date: apptDate,
-        start_time: startTime,
-        end_time: endTime,
-        clientId: userId,
-        serviceId: parseInt(serviceId),
-      }
-    })
-
-    return res.status(201).json(newAppointment)
-  } catch (error) {
-    console.error(error)
-    return res.status(500).json({ message: "Server error creating appointment" })
-  }
+        return res.status(201).json(newAppointment)
+    } catch (error) {
+        if (error.code === 'P2003') {
+           return res.status(400).json({ message: "Client or Service not found (Invalid clientId or serviceId)" })
+        }
+        if (error.code === 'P2002') {
+           return res.status(400).json({ message: "A client already has an appointment at this date and time" })
+        }
+        console.error(error)
+        return res.status(500).json({ message: "Server error creating appointment" })
+    }
 }
 
 export async function updateAppointment(req, res) {
@@ -141,7 +153,7 @@ export async function updateAppointment(req, res) {
         const appointmentId = parseInt(req.params.id)
         const loggedInUserId = req.user.userId
         const loggedInUserRole = req.user.role
-        const { appointment_date, start_time, end_time, serviceId, state } = req.body
+        const { appointment_date, start_time, end_time, serviceId, state, session_type } = req.body
 
         const appointment = await prisma.appointment.findUnique({
             where: { id: appointmentId }
@@ -159,15 +171,14 @@ export async function updateAppointment(req, res) {
         if (start_time) dataToUpdate.start_time = new Date(start_time)
         if (end_time) dataToUpdate.end_time = new Date(end_time)
         if (serviceId) dataToUpdate.serviceId = parseInt(serviceId)
-        
+        if (session_type) dataToUpdate.session_type = session_type.toUpperCase()
+
+        // Restricción: Solo el ADMIN puede cambiar el estado de la cita
         if (state) {
             if (loggedInUserRole === 'ADMIN') {
                 dataToUpdate.state = state.toUpperCase()
             } else {
-                if (state.toUpperCase() !== 'CANCELED') {
-                     return res.status(403).json({ message: "Customers can only attempt to cancel their appointments." })
-                }
-                dataToUpdate.state = 'CANCELED'
+                return res.status(403).json({ message: "Access denied. Only administrators can change the appointment state." })
             }
         }
         
@@ -182,29 +193,39 @@ export async function updateAppointment(req, res) {
 
         return res.json({ message: "Appointment updated successfully", appointment: updatedAppointment })
     } catch (error) {
+        if (error.code === 'P2003') {
+           return res.status(400).json({ message: "Service not found (Invalid serviceId)" })
+        }
+        if (error.code === 'P2002') {
+           return res.status(400).json({ message: "Another appointment already exists at this date and time for this client" })
+        }
         console.error(error)
         return res.status(500).json({ message: "Server error" })
     }
 }
 
-
 export async function deleteAppointment(req, res) {
-  try {
-    const appointmentId = req.params.id
+    try {
+        const appointmentId = parseInt(req.params.id)
+        const loggedInUserRole = req.user.role
 
-    const appointment = await prisma.appointment.findUnique({
-      where: { id: parseInt(appointmentId) }
-    })
+        if (loggedInUserRole !== 'ADMIN') {
+            return res.status(403).json({ message: "Access denied. Only administrators can delete appointments." })
+        }
 
-    if (!appointment) return res.status(404).json({ message: "Appointment not found" })
+        const appointment = await prisma.appointment.findUnique({
+            where: { id: appointmentId }
+        })
 
-    await prisma.appointment.delete({
-      where: { id: parseInt(appointmentId) }
-    })
+        if (!appointment) return res.status(404).json({ message: "Appointment not found" })
 
-    return res.json({ message: "Appointment deleted successfully" })
-  } catch (error) {
-    console.error(error)
-    return res.status(500).json({ message: "Server error deleting appointment" })
-  }
+        await prisma.appointment.delete({
+            where: { id: appointmentId }
+        })
+
+        return res.json({ message: "Appointment deleted successfully" })
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({ message: "Server error deleting appointment" })
+    }
 }

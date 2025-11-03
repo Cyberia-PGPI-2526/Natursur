@@ -22,5 +22,5 @@ app.use(cors({
 
 app.use('/api/v1/auth', authRoutes)
 app.use('/api/v1/users', userRoutes)
-app.use('/api/v1/appointment', appointmentRoutes)
+app.use('/api/v1/appointments', appointmentRoutes)
 app.use('/api/v1/services', serviceRoutes)

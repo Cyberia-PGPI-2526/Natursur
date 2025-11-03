@@ -12,6 +12,7 @@ import { useEffect } from 'react'
 import { refreshToken } from './service/auth.service'
 import AppCalendar from './pages/customer/Calendar'
 import Availability from './pages/customer/Availability'
+import MyAppointments from './pages/customer/MyAppointments'
 
 function App() {
   const { token, role } = useAuthStore()
@@ -37,7 +38,7 @@ function App() {
     case "CUSTOMER":
       customerRoutes = (
         <>
-          <Route path='/reservations' element={<PrivateRoute><Login /></PrivateRoute>} />
+          <Route path='/appointments/me' element={<PrivateRoute><MyAppointments /></PrivateRoute>} />
         </>
       )
       break

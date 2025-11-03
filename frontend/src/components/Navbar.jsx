@@ -41,6 +41,7 @@ export default function Navbar() {
         <>
           <NavLink className={linkClass} to="/" onClick={() => setIsOpen(false)}>Inicio</NavLink>
           <NavLink className={linkClass} to="/calendar" onClick={() => setIsOpen(false)}>Calendario</NavLink>
+          <NavLink className={linkClass} to="/appointments/me" onClick={() => setIsOpen(false)}>Mis Reservas</NavLink>
         </>
       break
     default:

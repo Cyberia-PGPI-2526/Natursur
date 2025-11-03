@@ -1,18 +1,17 @@
-import { useParams, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 
 export default function Availability() {
-  const { date } = useParams();
-  const navigate = useNavigate();
-  const selectedDate = new Date(date);
+  const { date } = useParams()
+  const navigate = useNavigate()
+  const selectedDate = new Date(date)
 
-  // Ejemplo: horas disponibles
-  const [hours] = useState(['09:00', '10:00', '11:00', '14:00', '15:00']);
-  const [treatment, setTreatment] = useState('');
+  const [hours] = useState(['09:00', '10:00', '11:00', '14:00', '15:00'])
+  const [treatment, setTreatment] = useState('')
 
   return (
     <div className="max-w-md mx-auto mt-6 p-6 bg-white rounded-xl shadow-lg">
-      {/* Botón volver */}
+    
       <button
         onClick={() => navigate(-1)}
         className="mb-4 text-[#009BA6] font-medium hover:text-[#00777F] transition"
@@ -24,7 +23,6 @@ export default function Availability() {
         Horas disponibles para {selectedDate.toLocaleDateString()}
       </h2>
 
-      {/* Select de tratamiento */}
       <div className="mb-6">
         <label className="block text-gray-700 font-medium mb-2">Tipo de tratamiento</label>
         <select
@@ -39,7 +37,6 @@ export default function Availability() {
         </select>
       </div>
 
-      {/* Horas disponibles en columna */}
       <div className="flex flex-col gap-3">
         {hours.map((hour) => (
           <button
@@ -51,5 +48,5 @@ export default function Availability() {
         ))}
       </div>
     </div>
-  );
+  )
 }
