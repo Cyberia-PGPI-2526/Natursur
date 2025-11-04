@@ -58,7 +58,7 @@ export const deleteUser = async (id) => {
         return response.data
     } catch (error) {
         if(error.response.status === 400) {
-            return { error: true }
+            return { error: true, message: error.response.data.message }
         }
         console.error(error)
     }
