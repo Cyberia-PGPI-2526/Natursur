@@ -1,164 +1,203 @@
-import { PrismaClient, Role, AppointmentState, SessionType } from '@prisma/client'
+import { PrismaClient, Role, AppointmentState } from '@prisma/client'
 import bcrypt from 'bcrypt'
+import { addMinutes } from 'date-fns'
 
 const prisma = new PrismaClient()
 
-const createAppointmentTime = (days, hours) => {
-    const date = new Date()
-    date.setDate(date.getDate() + days)
-    date.setHours(hours, 0, 0, 0)
-    return date
+function createFixedTime(dateString, hour) {
+  const date = new Date(dateString)
+  date.setHours(hour, 0, 0, 0)
+  return date
 }
 
 async function main() {
-    console.log('Iniciando script de seed...')
+  console.log('🌱 Iniciando script de seed...')
 
-    const hashedAdminPassword = await bcrypt.hash('admin123', 10)
-    const hashedCustomerPassword = await bcrypt.hash('customer123', 10)
+  const hashedAdminPassword = await bcrypt.hash('admin123', 10)
+  const hashedCustomerPassword = await bcrypt.hash('customer123', 10)
 
-    const adminUserData = await prisma.user.upsert({
-        where: { email: 'admin@example.com' },
-        update: {},
-        create: {
-            email: 'admin@example.com',
-            name: 'Admin User',
-            password: hashedAdminPassword,
-            role: Role.ADMIN,
+
+  const adminUser = await prisma.user.upsert({
+    where: { email: 'admin@example.com' },
+    update: {},
+    create: {
+      email: 'admin@example.com',
+      name: 'Admin User',
+      password: hashedAdminPassword,
+      role: Role.ADMIN,
+    },
+  })
+
+  const customerUserData = []
+  for (let i = 0; i <= 25; i++) {
+    const user = await prisma.user.upsert({
+      where: { email: `customer${i}@example.com` },
+      update: {},
+      create: {
+        email: `customer${i}@example.com`,
+        name: `Customer ${i}`,
+        password: hashedCustomerPassword,
+        role: Role.CUSTOMER,
+      },
+    })
+    customerUserData.push(user)
+  }
+
+  console.log('✅ Usuarios (Admin + 26 Clientes) creados')
+
+  // 🔹 Crear servicios
+  const servicios = [
+    {
+      name: 'Masaje y Osteopatía',
+      description:
+        'El cuerpo es un sistema en constante ajuste. A través de técnicas de masaje y osteopatía, trabajamos para liberar restricciones y restaurar la armonía del cuerpo.',
+    },
+    {
+      name: 'Par Biomagnético',
+      description:
+        'Terapia que utiliza imanes para equilibrar el cuerpo y mejorar el bienestar general.',
+    },
+    {
+      name: 'Técnicas Emocionales',
+      description:
+        'Ayuda a liberar emociones atrapadas y equilibrar el cuerpo y la mente.',
+    },
+    {
+      name: 'Asesoramiento Nutricional y Estilo de Vida',
+      description:
+        'Mejora tus hábitos y alimentación con un enfoque basado en la naturopatía.',
+    },
+    {
+      name: 'VARS (Valoración, Análisis y Reequilibrio del Sistema)',
+      description:
+        'Valoración completa para analizar y reequilibrar el sistema corporal y energético.',
+    },
+    {
+      name: 'Reiki',
+      description:
+        'Técnica energética para equilibrar la energía, reducir el estrés y favorecer la autocuración.',
+    },
+  ]
+
+  for (const s of servicios) {
+    await prisma.service.upsert({
+      where: { name: s.name },
+      update: s,
+      create: s,
+    })
+  }
+
+  console.log('✅ Servicios creados')
+
+  // Obtener algunos servicios por nombre
+  const [masaje, reiki, vars] = await prisma.service.findMany({
+    where: {
+      name: {
+        in: ['Masaje y Osteopatía', 'Reiki', 'VARS (Valoración, Análisis y Reequilibrio del Sistema)'],
+      },
+    },
+    select: { id: true, name: true },
+  })
+
+  // 🔹 Citas de ejemplo
+  const citas = [
+    {
+      date: '2025-11-20',
+      hour: 12,
+      clientIndex: 1,
+      serviceId: masaje.id,
+      state: AppointmentState.CONFIRMED,
+    },
+    {
+      date: '2025-11-20',
+      hour: 18,
+      clientIndex: 2,
+      serviceId: vars.id,
+      state: AppointmentState.PENDING,
+    },
+    {
+      date: '2025-11-26',
+      hour: 20,
+      clientIndex: 3,
+      serviceId: reiki.id,
+      state: AppointmentState.COMPLETED,
+    },
+  ]
+
+  for (const cita of citas) {
+    const start = createFixedTime(cita.date, cita.hour)
+    const end = addMinutes(start, 59)
+    const appointment_date = new Date(cita.date)
+    appointment_date.setHours(0, 0, 0, 0)
+
+    await prisma.appointment.upsert({
+      where: {
+        appointment_date_start_time_clientId: {
+          appointment_date,
+          start_time: start,
+          clientId: customerUserData[cita.clientIndex].id,
         },
+      },
+      update: { state: cita.state },
+      create: {
+        appointment_date,
+        start_time: start,
+        end_time: end,
+        clientId: customerUserData[cita.clientIndex].id,
+        serviceId: cita.serviceId,
+        state: cita.state,
+      },
+    })
+  }
+
+  console.log('✅ Citas de ejemplo creadas')
+
+  // 🔹 Bloqueos de ejemplo (sin upsert)
+  const bloqueos = [
+    {
+      date: new Date('2025-11-27'),
+      full_day: true,
+      reason: 'Festivo local',
+    },
+    {
+      date: new Date('2025-11-28'),
+      full_day: false,
+      start_time: createFixedTime('2025-11-28', 10),
+      end_time: createFixedTime('2025-11-28', 12),
+      reason: 'Mantenimiento',
+    },
+  ]
+
+  for (const b of bloqueos) {
+    const exists = await prisma.blockedSlot.findFirst({
+      where: {
+        date: b.date,
+        full_day: b.full_day,
+        start_time: b.start_time ?? null,
+        end_time: b.end_time ?? null,
+      },
     })
 
-    const customerUserData = []
-    for (let i = 0; i <= 25; i++) {
-        const user = await prisma.user.upsert({
-            where: { email: `customer${i}@example.com` },
-            update: {},
-            create: {
-                email: `customer${i}@example.com`,
-                name: `Customer ${i}`,
-                password: hashedCustomerPassword,
-                role: Role.CUSTOMER,
-            },
-        })
-        customerUserData.push(user)
+    if (exists) {
+      await prisma.blockedSlot.update({
+        where: { id: exists.id },
+        data: b,
+      })
+    } else {
+      await prisma.blockedSlot.create({ data: b })
     }
+  }
 
-    console.log('Usuarios (Admin + 26 Clientes) creados')
-
-    const servicios = [
-        {
-            name: 'Masaje y Osteopatía',
-            description:
-                'El cuerpo es un sistema en constante ajuste. El dolor, la tensión o la falta de movilidad son señales de que algo no está funcionando bien. A través de técnicas de masaje y osteopatía, trabajamos para liberar restricciones, mejorar la postura y restaurar la armonía de tu organismo. Mi objetivo es ayudarte a moverte sin dolor y con mayor libertad, respetando siempre la estructura natural de tu cuerpo. Reserva tu sesión de osteopatía. Equilibra tu energía y fortalece tu bienestar.',
-
-        },
-        {
-            name: 'Par Biomagnético',
-            description:
-                'Nuestro organismo está lleno de campos energéticos que, en ocasiones, se ven alterados por virus, bacterias o desequilibrios internos. El Par Biomagnético es una técnica que utiliza imanes para restaurar el balance natural del cuerpo, favoreciendo la capacidad de recuperación del organismo. Si buscas una terapia complementaria para mejorar tu bienestar, esta puede ser una excelente opción. Consulta sobre esta técnica. Libera emociones atrapadas y recupera tu bienestar.',
-
-        },
-        {
-            name: 'Técnicas Emocionales',
-            description:
-                'Las emociones no solo afectan nuestra mente, también pueden dejar huella en nuestro cuerpo. Muchas tensiones musculares, bloqueos o molestias físicas tienen un origen emocional. Utilizo diversas técnicas para ayudarte a liberar esas cargas y sentirte más ligero y equilibrado. Referencia: "El Código de la Emoción" (Dr. Bradley Nelson). Basándome en estos principios, aplico técnicas para identificar y liberar esas emociones acumuladas. Método craneosacral, liberación de emociones atrapadas, Reiki y otras técnicas energéticas.',
-
-        },
-        {
-            name: 'Asesoramiento Nutricional y Estilo de Vida',
-            description:
-                'La alimentación es la base de nuestra energía y bienestar. No se trata solo de perder peso, sino de aprender a nutrir el cuerpo de forma adecuada. A través de un enfoque basado en la naturopatía, te ayudo a mejorar tu alimentación y a crear hábitos saludables que realmente funcionen para ti. Además ofrezco Valoración Gratuita y retos de transformación de 21 días con incentivos.',
-
-        },
-        {
-            name: 'VARS (Valoración, Análisis y Reequilibrio del Sistema)',
-            description:
-                'VARS es una valoración completa para analizar y reequilibrar el sistema corporal y energético. Incluye diagnóstico, plan de acción y seguimiento personalizado. Puede combinarse con otras terapias como Reiki o Par Biomagnético según necesidad.',
-
-        },
-        {
-            name: 'Reiki',
-            description:
-                'Reiki: Técnica energética que equilibra. Sesiones destinadas a equilibrar la energía, reducir el estrés y favorecer procesos de autocuración. Reserva tu sesión emocional.',
-
-        },
-    ]
-
-    for (const s of servicios) {
-        await prisma.service.upsert({
-            where: { name: s.name },
-            update: s,
-            create: s,
-        })
-    }
-
-    const [masaje, reiki, vars] = await prisma.service.findMany({
-        where: { name: { in: ['Masaje y Osteopatía', 'Reiki', 'VARS (Valoración, Análisis y Reequilibrio del Sistema)'] } },
-        select: { id: true, name: true },
-        orderBy: { name: 'asc' }
-    })
-
-    console.log('Servicios creados')
-
-    const start1 = createAppointmentTime(1, 9)
-    const end1 = createAppointmentTime(1, 10)
-    const date1 = new Date(start1)
-    date1.setHours(0, 0, 0, 0)
-
-    const start2 = createAppointmentTime(2, 11)
-    const end2 = createAppointmentTime(2, 13)
-    const date2 = new Date(start2)
-    date2.setHours(0, 0, 0, 0)
-
-    const start3 = createAppointmentTime(-7, 15)
-    const end3 = createAppointmentTime(-7, 16)
-    const date3 = new Date(start3)
-    date3.setHours(0, 0, 0, 0)
-
-    const appointmentsData = [
-        {
-            appointment_date: date1,
-            start_time: start1,
-            end_time: end1,
-            clientId: customerUserData[1].id,
-            serviceId: masaje.id,
-            state: AppointmentState.CONFIRMED,
-            session_type: SessionType.MIN_60,
-        },
-        {
-            appointment_date: date2,
-            start_time: start2,
-            end_time: end2,
-            clientId: customerUserData[2].id,
-            serviceId: vars.id,
-            state: AppointmentState.PENDING,
-            session_type: SessionType.MIN_90,
-        },
-        {
-            appointment_date: date3,
-            start_time: start3,
-            end_time: end3,
-            clientId: customerUserData[1].id,
-            serviceId: reiki.id,
-            state: AppointmentState.COMPLETED,
-            session_type: SessionType.MIN_60,
-        },
-    ]
-
-    for (const data of appointmentsData) {
-        await prisma.appointment.create({
-            data: data,
-        })
-    }
-
-    console.log('3 Citas de ejemplo creadas')
+  console.log('✅ Bloqueos de ejemplo creados')
+  console.log('🎉 Seed completado correctamente')
 }
 
 main()
-    .then(async () => {
-        await prisma.$disconnect()
-    })
-    .catch(async (e) => {
-        console.error(e)
-        await prisma.$disconnect()
-        process.exit(1)
-    })
+  .then(async () => {
+    await prisma.$disconnect()
+  })
+  .catch(async (e) => {
+    console.error(e)
+    await prisma.$disconnect()
+    process.exit(1)
+  })

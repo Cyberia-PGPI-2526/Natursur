@@ -74,7 +74,7 @@ model Appointment {
   appointment_date  DateTime
   start_time        DateTime
   end_time          DateTime
-  session_type      SessionType
+  session_type      SessionType          @default(MIN_60)
   state             AppointmentState     @default(PENDING) 
 
   client            User     @relation("ClientAppointments", fields: [clientId], references: [id])
@@ -85,6 +85,17 @@ model Appointment {
 
   @@unique([appointment_date, start_time, clientId])
 } 
+
+model BlockedSlot {
+  id          Int      @id @default(autoincrement())
+  date        DateTime // Fecha del día bloqueado
+  start_time  DateTime? // Hora de inicio del bloqueo
+  end_time    DateTime? // Hora de fin del bloqueo
+  reason      String?  // (opcional) descripción del motivo
+  full_day    Boolean  @default(false) // Si true, bloquea todo el día
+  createdAt   DateTime @default(now())
+
+}
 
 enum AppointmentState {
   PENDING

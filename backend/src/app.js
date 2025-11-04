@@ -6,6 +6,7 @@ import { userRoutes } from "./user/user.routes.js"
 import { authRoutes } from "./auth/auth.routes.js"
 import { appointmentRoutes } from "./appointment/appointment.route.js"
 import { serviceRoutes } from "./service/service.routes.js"
+import { availabilityRouter } from "./availability/availability.routes.js"
 
 
 export const app = express()
@@ -24,3 +25,4 @@ app.use('/api/v1/auth', authRoutes)
 app.use('/api/v1/users', userRoutes)
 app.use('/api/v1/appointments', appointmentRoutes)
 app.use('/api/v1/services', serviceRoutes)
+app.use('/api/v1/availability', availabilityRouter)

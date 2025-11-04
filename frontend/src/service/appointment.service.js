@@ -41,6 +41,7 @@ export const getAppointment = async (id) => {
 
 export const createAppointment = async (data) => {
     try {
+        console.log(data)
         const response = await api.post('/appointments', data)
         return response.data
     } catch (error) {
