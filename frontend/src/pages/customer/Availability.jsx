@@ -1,3 +1,9 @@
+import { useParams, useNavigate } from "react-router-dom"
+import { useEffect, useState } from "react"
+import { getEnabledServices } from "../../service/services.service"
+import { getAvailableHours } from "../../service/availability.service"
+import { createAppointment } from "../../service/appointment.service"
+
 export default function Availability() {
   const { date } = useParams()
   const navigate = useNavigate()
@@ -13,7 +19,7 @@ export default function Availability() {
   const [selectedHour, setSelectedHour] = useState(null)
   const [showModal, setShowModal] = useState(false)
   const [creating, setCreating] = useState(false)
-  const [popupError, setPopupError] = useState("") // <-- nuevo estado
+  const [popupError, setPopupError] = useState("")
 
   useEffect(() => {
     const fetchServices = async () => {
