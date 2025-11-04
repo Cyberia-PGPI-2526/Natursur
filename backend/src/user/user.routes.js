@@ -6,8 +6,6 @@ import { updateUserValidation } from "./user.validation.js"
 
 export const userRoutes = Router()
 
-
-
 userRoutes.get("/", 
     requiresAuth,
     checkRole("ADMIN"),
