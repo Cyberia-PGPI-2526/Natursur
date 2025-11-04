@@ -9,7 +9,7 @@ const site = isProd ? "lax" : "none"
 
 export async function registerUser(req, res) {
     try {
-        const { name, email, password } = req.body
+        const { name, email, phone_number, password } = req.body
 
         const user = await prisma.user.findUnique({
             where: {
@@ -25,6 +25,7 @@ export async function registerUser(req, res) {
             data: {
                 name,
                 email,
+                phone_number,
                 password: hashedPassword,
                 role: Role.CUSTOMER
             }
