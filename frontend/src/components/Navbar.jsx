@@ -35,12 +35,15 @@ export default function Navbar() {
           <NavLink className={linkClass} to="/" onClick={() => setIsOpen(false)}>Inicio</NavLink>
           <NavLink className={linkClass} to="/users" onClick={() => setIsOpen(false)}>Usuarios</NavLink>
           <NavLink className={linkClass} to="/services" onClick={() => setIsOpen(false)}>Servicios</NavLink>
+          <NavLink className={linkClass} to="/products" onClick={() => setIsOpen(false)}>Productos</NavLink>
         </>
       break
     case "CUSTOMER":
       customerRoutes =
         <>
           <NavLink className={linkClass} to="/" onClick={() => setIsOpen(false)}>Inicio</NavLink>
+          <NavLink className={linkClass} to="/services" onClick={() => setIsOpen(false)}>Servicios</NavLink>
+          <NavLink className={linkClass} to="/products" onClick={() => setIsOpen(false)}>Productos</NavLink>
           <NavLink className={linkClass} to="/calendar" onClick={() => setIsOpen(false)}>Calendario</NavLink>
           <NavLink className={linkClass} to="/appointments/me" onClick={() => setIsOpen(false)}>Mis Reservas</NavLink>
         </>
