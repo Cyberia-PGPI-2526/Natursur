@@ -133,9 +133,17 @@ export async function deleteUser(req, res) {
   try {
     const userId = req.params.id
 
+    const existingAppointments = await prisma.appointment.findMany({
+      where: { clientId: parseInt(userId) }
+    });
+
+    if (existingAppointments.length > 0) {
+      return res.status(400).json({ message: "User has associated appointments" });
+    }
+
     if(parseInt(userId) === req.user.userId) return res.status(400).json({ message: "Can't delete" })
 
-    await prisma.refreshToken.delete({
+    await prisma.refreshToken.deleteMany({
       where: { userId: parseInt(userId) }
     })
 

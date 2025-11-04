@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { getUsers, deleteUser, getUser, updateUser } from "../../service/users.service"
 import Toast from "../../components/Toast"
 import Modal from "../../components/Modal"
+import DeleteUserModal from "../../components/DeletionUserModal"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -26,6 +27,8 @@ export default function Users() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingUser, setEditingUser] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [userToDelete, setUserToDelete] = useState(null)
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm({
     resolver: zodResolver(schema),
@@ -61,18 +64,25 @@ export default function Users() {
     setPage(page + 1)
   }
 
-  const handleDelete = async (userId) => {
-    const confirmed = window.confirm("¿Estás seguro de que quieres eliminar este usuario?")
-    if (!confirmed) return
+  const handleDeleteClick = (user) => {
+    setUserToDelete(user)
+    setIsDeleteModalOpen(true)
+  }
 
-    const res = await deleteUser(userId)
+  const handleDeleteConfirm = async () => {
+    if (!userToDelete) return
+
+    const res = await deleteUser(userToDelete.id)
 
     if (res.error) {
-      setToast({ message: "No se pudo eliminar el usuario", type: "error" })
+      setToast({ message: res.message, type: "error" })
     } else {
-      setUsers(users.filter((user) => user.id !== userId))
+      setUsers(users.filter((user) => user.id !== userToDelete.id))
       setToast({ message: "Usuario eliminado exitosamente", type: "success" })
     }
+
+    setIsDeleteModalOpen(false)
+    setUserToDelete(null)
   }
 
   const handleEdit = async (user) => {
@@ -178,7 +188,7 @@ export default function Users() {
                         Editar
                       </button>
                       <button
-                        onClick={() => handleDelete(user.id)}
+                        onClick={() => handleDeleteClick(user)}
                         className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition font-medium"
                       >
                         Eliminar
@@ -310,6 +320,12 @@ export default function Users() {
           </div>
         </form>
       </Modal>
+      <DeleteUserModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        userName={userToDelete?.name}
+      />
     </div>
   )
 }
