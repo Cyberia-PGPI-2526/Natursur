@@ -11,6 +11,16 @@ export const loginUser = async (loginData) => {
     }
 }
 
+export const registerUser = async (registerData) => {
+    try {
+        const response = await api.post('/auth/register', registerData)
+        return response.data
+    } catch (error) {
+        console.error(error)
+        return {error: 'Registration failed' }
+    }
+}
+
 export const refreshToken = async () => {
     try {
         console.log("Ejecutando refresh")

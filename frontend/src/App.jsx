@@ -16,6 +16,7 @@ import { refreshToken } from './service/auth.service'
 import AppCalendar from './pages/customer/Calendar'
 import Availability from './pages/customer/Availability'
 import MyAppointments from './pages/customer/MyAppointments'
+import Register from './pages/Register'
 
 function App() {
   const { token, role } = useAuthStore()
@@ -64,7 +65,7 @@ function App() {
     publicRoutes = (
       <>
         <Route path='/login' element={<Login />} />
-        <Route path='/register' element={<Login />} />
+        <Route path='/register' element={<Register />} />
       </>
     )
   } else {
