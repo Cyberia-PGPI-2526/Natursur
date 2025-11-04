@@ -99,3 +99,52 @@ export const deleteAppointment = async (id) => {
         return { error: "Error al eliminar la cita" }
     }
 }
+
+// Acciones de administración sobre estados
+export const confirmAppointment = async (id) => {
+    try {
+        const { data } = await api.post(`/appointments/${id}/confirm`)
+        return data
+    } catch (error) {
+        const status = error.response?.status
+        if (status === 403) return { error: "Solo un administrador puede confirmar citas" }
+        if (status === 404) return { error: "Cita no encontrada" }
+        return { error: "Error al confirmar la cita" }
+    }
+}
+
+export const cancelAppointment = async (id) => {
+    try {
+        const { data } = await api.post(`/appointments/${id}/cancel`)
+        return data
+    } catch (error) {
+        const status = error.response?.status
+        if (status === 403) return { error: "Solo un administrador puede cancelar citas" }
+        if (status === 404) return { error: "Cita no encontrada" }
+        return { error: "Error al cancelar la cita" }
+    }
+}
+
+export const completeAppointment = async (id) => {
+    try {
+        const { data } = await api.post(`/appointments/${id}/complete`)
+        return data
+    } catch (error) {
+        const status = error.response?.status
+        if (status === 403) return { error: "Solo un administrador puede completar citas" }
+        if (status === 404) return { error: "Cita no encontrada" }
+        return { error: "Error al completar la cita" }
+    }
+}
+
+export const markNoShowAppointment = async (id) => {
+    try {
+        const { data } = await api.post(`/appointments/${id}/no-show`)
+        return data
+    } catch (error) {
+        const status = error.response?.status
+        if (status === 403) return { error: "Solo un administrador puede marcar como no asistida" }
+        if (status === 404) return { error: "Cita no encontrada" }
+        return { error: "Error al marcar no asistencia" }
+    }
+}

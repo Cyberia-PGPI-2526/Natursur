@@ -9,6 +9,7 @@ import { useAuthStore } from './store/authStore'
 import Users from './pages/admin/Users'
 import User from './pages/admin/User'
 import AdminServices from './pages/admin/Services'
+import AdminReservations from './pages/admin/Reservations'
 import CustomerServices from './pages/Services'
 import Products from './pages/Products'
 import { useEffect, useState } from 'react'
@@ -41,6 +42,7 @@ function App() {
         <>
           <Route path='/users' element={<PrivateRoute><Users /></PrivateRoute>} />
           <Route path='/users/:id' element={<PrivateRoute><User /></PrivateRoute>} />
+          <Route path='/reservations' element={<PrivateRoute><AdminReservations /></PrivateRoute>} />
           <Route path='/services' element={<PrivateRoute><AdminServices /></PrivateRoute>} />
           <Route path='/products' element={<PrivateRoute><Products /></PrivateRoute>} />
         </>

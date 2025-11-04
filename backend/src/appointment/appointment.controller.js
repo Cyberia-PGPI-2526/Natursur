@@ -68,7 +68,7 @@ export async function getAppointments(req, res) {
                         select: { id: true, name: true, email: true }
                     },
                     service: {
-                        select: { id: true, name: true, duration_minutes: true, price_cents: true }
+                        select: { id: true, name: true }
                     }
                 },
                 orderBy: {
@@ -220,4 +220,40 @@ export async function deleteAppointment(req, res) {
         console.error(error)
         return res.status(500).json({ message: "Server error deleting appointment" })
     }
+}
+
+// Helpers y acciones específicas para ADMIN sobre el estado de la cita
+async function setAppointmentState(req, res, newState) {
+    try {
+        const appointmentId = parseInt(req.params.id)
+
+        const appointment = await prisma.appointment.findUnique({ where: { id: appointmentId } })
+        if (!appointment) return res.status(404).json({ message: "Cita no encontrada" })
+
+        const updated = await prisma.appointment.update({
+            where: { id: appointmentId },
+            data: { state: newState }
+        })
+
+        return res.json({ message: `Estado actualizado a ${newState}`, appointment: updated })
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({ message: "Error del servidor al actualizar el estado" })
+    }
+}
+
+export async function confirmAppointment(req, res) {
+    return setAppointmentState(req, res, 'CONFIRMED')
+}
+
+export async function cancelAppointment(req, res) {
+  return setAppointmentState(req, res, 'CANCELED')
+}
+
+export async function completeAppointment(req, res) {
+    return setAppointmentState(req, res, 'COMPLETED')
+}
+
+export async function markNotAssisted(req, res) {
+    return setAppointmentState(req, res, 'NOT_ASSISTED')
 }
