@@ -6,7 +6,6 @@ export const loginUser = async (loginData) => {
         const response = await api.post('/auth/login', loginData)
         return response.data
     } catch (error) {
-        console.error(error)
         return {error: 'Invalid credentials' }
     }
 }
@@ -16,16 +15,13 @@ export const registerUser = async (registerData) => {
         const response = await api.post('/auth/register', registerData)
         return response.data
     } catch (error) {
-        console.error(error)
         return {error: 'Registration failed' }
     }
 }
 
 export const refreshToken = async () => {
     try {
-        console.log("Ejecutando refresh")
         const response = await api.post('/auth/refresh')
-        console.log(response)
         useAuthStore.getState()
             .login({
                 token: response.data.token,
@@ -35,7 +31,6 @@ export const refreshToken = async () => {
         return response.data
     } catch (error) {
         useAuthStore.getState().logout()
-        console.error(error)
     }
 }
 
@@ -45,7 +40,6 @@ export const logout = async () => {
         useAuthStore.getState().logout()
         return response.data
     } catch (error) {
-        console.error(error)
         useAuthStore.getState().logout()
     }
 }
@@ -55,6 +49,5 @@ export const validateToken = async () => {
         const response = await api.get('/auth/validate')
         return response.data
     } catch (error) {
-        console.error(error)
     }
 }

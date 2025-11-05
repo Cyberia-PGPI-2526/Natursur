@@ -8,14 +8,18 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 
 const schema = z.object({
-    name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
-    email: z.string().email("Email inválido"),
-    role: z.enum(["ADMIN", "CUSTOMER"], { errorMap: () => ({ message: "Rol inválido" }) }),
-    password: z.string().optional().or(z.literal("")).refine(
-        (val) => val === "" || val.length >= 4,
-        { message: "La contraseña debe tener al menos 4 caracteres" }
-    )
+  name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
+  email: z.string().email("Email inválido"),
+  phoneNumber: z.string()
+    .min(6, "El número debe tener al menos 6 caracteres")
+    .regex(/^[\d+\s-]+$/, "Número inválido"),
+  role: z.enum(["ADMIN", "CUSTOMER"], { errorMap: () => ({ message: "Rol inválido" }) }),
+  password: z.string().optional().or(z.literal("")).refine(
+    (val) => val === "" || val.length >= 4,
+    { message: "La contraseña debe tener al menos 4 caracteres" }
+  )
 })
+
 
 export default function Users() {
   const [users, setUsers] = useState([])
@@ -42,7 +46,7 @@ export default function Users() {
         setPage(res.page)
         setTotalPages(res.totalPages)
       } catch (error) {
-        console.error(error)
+        setUsers([])
       } finally {
         setIsLoading(false)
       }
@@ -83,15 +87,16 @@ export default function Users() {
 
   const handleEdit = async (user) => {
     setEditingUser(user)
-    const res = await getUser(user.id)
     reset({
       name: res.name,
       email: res.email,
+      phoneNumber: res.phone_number || "",
       role: res.role,
       password: ""
     })
     setIsModalOpen(true)
   }
+
 
   const handleCloseModal = () => {
     if (!isSubmitting) {
@@ -153,7 +158,6 @@ export default function Users() {
           <table className="min-w-full">
             <thead className="bg-[#009BA6] text-white">
               <tr>
-                <th className="py-4 px-6 text-left font-semibold">#</th>
                 <th className="py-4 px-6 text-left font-semibold">Nombre</th>
                 <th className="py-4 px-6 text-left font-semibold">Email</th>
                 <th className="py-4 px-6 text-left font-semibold">Rol</th>
@@ -163,14 +167,12 @@ export default function Users() {
             <tbody className="divide-y divide-gray-200">
               {users.map((user, index) => (
                 <tr key={user.id} className="hover:bg-gray-50 transition duration-300">
-                  <td className="py-4 px-6 text-gray-700">{(page - 1) * 10 + index + 1}</td>
                   <td className="py-4 px-6 text-gray-900 font-medium">{user.name}</td>
                   <td className="py-4 px-6 text-gray-700">{user.email}</td>
                   <td className="py-4 px-6">
                     <span
-                      className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                        user.role === "ADMIN" ? "bg-[#009BA6] text-white" : "bg-green-100 text-green-700"
-                      }`}
+                      className={`px-3 py-1 rounded-full text-sm font-semibold ${user.role === "ADMIN" ? "bg-[#009BA6] text-white" : "bg-green-100 text-green-700"
+                        }`}
                     >
                       {user.role}
                     </span>
@@ -254,6 +256,20 @@ export default function Users() {
               disabled={isSubmitting}
             />
             {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
+          </div>
+
+          <div>
+            <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
+              Número de Teléfono *
+            </label>
+            <input
+              {...register("phoneNumber")}
+              type="text"
+              id="phoneNumber"
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#009BA6] border-gray-300"
+              disabled={isSubmitting}
+            />
+            {errors.phoneNumber && <p className="text-red-500 text-sm mt-1">{errors.phoneNumber.message}</p>}
           </div>
 
           <div>

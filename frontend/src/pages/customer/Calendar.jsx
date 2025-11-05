@@ -25,17 +25,14 @@ export default function CalendarioDisponibilidad() {
     const blockedDatesSet = new Set()
     const partialBlockedDatesSet = new Set()
     
-    // Procesar bloqueos
     if (data.blockedSlots) {
       data.blockedSlots.forEach(block => {
         const date = new Date(block.date)
         const dateStr = date.toISOString().split('T')[0]
         
-        // Si es día completo, añadir a blockedDates para impedir clic
         if (block.full_day) {
           blockedDatesSet.add(dateStr)
         } else {
-          // Si es bloqueo parcial, añadir a partialBlockedDatesSet
           partialBlockedDatesSet.add(dateStr)
         }
         
@@ -83,7 +80,6 @@ export default function CalendarioDisponibilidad() {
       return
     }
 
-    // Verificar si el día está bloqueado completamente
     if (blockedDates.has(arg.dateStr)) {
       alert('Este día está completamente bloqueado y no está disponible para reservas.')
       return
@@ -169,26 +165,22 @@ export default function CalendarioDisponibilidad() {
           const isFullBlocked = blockedDates.has(dateStr)
           const isPartialBlocked = partialBlockedDates.has(dateStr)
           
-          // Aplicar clases y estilos directamente al elemento DOM
           if (!isPast) {
             const allChildren = arg.el.querySelectorAll('*')
             
             if (isFullBlocked) {
-              // DÍA BLOQUEADO COMPLETO - cursor pointer (mano)
               arg.el.classList.add('blocked-full-day')
               arg.el.style.cursor = 'pointer'
               allChildren.forEach(child => {
                 child.style.cursor = 'pointer'
               })
             } else if (isPartialBlocked) {
-              // DÍA CON BLOQUEO PARCIAL - cursor prohibido
               arg.el.classList.add('blocked-partial')
               arg.el.style.cursor = 'not-allowed'
               allChildren.forEach(child => {
                 child.style.cursor = 'not-allowed'
               })
             } else {
-              // DÍA DISPONIBLE - cursor pointer (mano)
               arg.el.classList.add('available-day')
               arg.el.style.cursor = 'pointer'
               allChildren.forEach(child => {

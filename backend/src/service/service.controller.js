@@ -8,7 +8,6 @@ export async function indexServices(req, res) {
 
     return res.json(services)
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ message: "Server error" })
   }
 }
@@ -22,7 +21,6 @@ export async function indexEnabledServices(req, res) {
 
     return res.json(services)
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ message: "Server error" })
   }
 }
@@ -44,7 +42,6 @@ export async function indexService(req, res) {
 
     return res.json(service)
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ message: "Server error" })
   }
 }
@@ -64,7 +61,6 @@ export async function createService(req, res) {
 
     return res.status(201).json({ message: "Service created" })
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ message: "Server error" })
   }
 }
@@ -91,7 +87,6 @@ export async function updateService(req, res) {
 
     return res.json({ message: "Service updated" })
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ message: "Server error" })
   }
 }
@@ -112,7 +107,6 @@ export async function deleteService(req, res) {
 
     return res.json({ message: "Service deleted" })
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ message: "Server error" })
   }
 }

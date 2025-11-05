@@ -3,7 +3,6 @@ import { prisma } from "../config/db.js"
 
 export async function getMyAppointments(req, res) {
     try {
-        console.log("corre my appointments")
         const userId = req.user.userId
         let { page = 1, limit = 10 } = req.query
         page = parseInt(page)
@@ -38,7 +37,6 @@ export async function getMyAppointments(req, res) {
             appointments
         })
     } catch (error) {
-        console.error(error)
         return res.status(500).json({ message: "Server error" })
     }
 }
@@ -86,7 +84,6 @@ export async function getAppointments(req, res) {
             appointments
         })
     } catch (error) {
-        console.error(error)
         return res.status(500).json({ message: "Server error" })
     }
 }
@@ -115,14 +112,12 @@ export async function getAppointment(req, res) {
 
         return res.json(appointment)
     } catch (error) {
-        console.error(error)
         return res.status(500).json({ message: "Server error getting appointment" })
     }
 }
 
 export async function createAppointment(req, res) {
   try {
-    console.log("llega a create")
     const userId = req.user.userId
     const { appointment_date, start_time, end_time, serviceId } = req.body
 
@@ -139,7 +134,6 @@ export async function createAppointment(req, res) {
 
     return res.status(201).json(newAppointment)
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ message: "Error del servidor al crear la cita" })
   }
 }
@@ -189,7 +183,6 @@ export async function updateAppointment(req, res) {
 
     return res.json({ message: "Cita actualizada correctamente", appointment: updatedAppointment })
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ message: "Error del servidor al actualizar la cita" })
   }
 }
@@ -217,7 +210,6 @@ export async function deleteAppointment(req, res) {
 
         return res.json({ message: "Appointment deleted successfully" })
     } catch (error) {
-        console.error(error)
         return res.status(500).json({ message: "Server error deleting appointment" })
     }
 }
@@ -237,7 +229,6 @@ async function setAppointmentState(req, res, newState) {
 
         return res.json({ message: `Estado actualizado a ${newState}`, appointment: updated })
     } catch (error) {
-        console.error(error)
         return res.status(500).json({ message: "Error del servidor al actualizar el estado" })
     }
 }

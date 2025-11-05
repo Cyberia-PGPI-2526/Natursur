@@ -13,7 +13,9 @@ export const app = express()
 
 app.use(helmet())
 app.use(express.json())
-app.use(cookieParser()) 
+app.use(cookieParser())
+
+
 
 app.use(cors({
   origin: "http://localhost:5173",
@@ -26,3 +28,9 @@ app.use('/api/v1/users', userRoutes)
 app.use('/api/v1/appointments', appointmentRoutes)
 app.use('/api/v1/services', serviceRoutes)
 app.use('/api/v1/availability', availabilityRouter)
+
+app.get('/api/v1/health', 
+  async (req, res) => {
+    res.send({ message: ok})
+  }
+)

@@ -36,7 +36,6 @@ export async function checkAppointmentConflict(req, res, next) {
 
     next()
   } catch (error) {
-    console.error(error)
     return res.status(500).json({
       message: "Error verificando conflictos de citas",
     })
@@ -82,7 +81,6 @@ export async function checkBlockedSlot(req, res, next) {
 
     next()
   } catch (error) {
-    console.error("Error en checkBlockedSlot:", error)
     return res.status(500).json({ message: "Error verificando bloqueos del día o franja horaria" })
   }
 }

@@ -69,9 +69,6 @@ export default function Services() {
 
     if (result.error) {
       setToast({ message: result.error, type: 'error' })
-      if (result.errors) {
-        console.error('Validation errors:', result.errors)
-      }
     } else {
       setToast({ 
         message: editingService ? 'Servicio actualizado exitosamente' : 'Servicio creado exitosamente',

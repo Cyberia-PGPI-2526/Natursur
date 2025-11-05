@@ -5,7 +5,6 @@ export const getAllServices = async () => {
         const response = await api.get('/services/all')
         return { services: response.data }
     } catch (error) {
-        console.error(error)
         return { error: 'Error al cargar servicios' }
     }
 }
@@ -15,7 +14,6 @@ export const getEnabledServices = async () => {
         const response = await api.get('/services')
         return { services: response.data }
     } catch (error) {
-        console.error(error)
         return { error: 'Error al cargar servicios' }
     }
 }
@@ -25,7 +23,6 @@ export const getService = async (id) => {
         const response = await api.get(`/services/${id}`)
         return response.data
     } catch (error) {
-        console.error(error)
         return { error: 'Error al cargar servicio' }
     }
 }
@@ -35,7 +32,6 @@ export const createService = async (data) => {
         const response = await api.post('/services', data)
         return response.data
     } catch (error) {
-        console.error(error)
         if (error.response) {
             const status = error.response.status
             const data = error.response.data
@@ -59,7 +55,6 @@ export const updateService = async (id, data) => {
         const response = await api.put(`/services/${id}`, data)
         return response.data
     } catch (error) {
-        console.error(error)
         if (error.response) {
             const status = error.response.status
             const data = error.response.data
@@ -83,7 +78,6 @@ export const deleteService = async (id) => {
         const response = await api.delete(`/services/${id}`)
         return response.data
     } catch (error) {
-        console.error(error)
         if (error.response) {
             const status = error.response.status
             const data = error.response.data

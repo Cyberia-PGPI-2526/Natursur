@@ -28,7 +28,6 @@ export default function Reservations() {
       setTotalPages(res.totalPages || 1)
       setPage(res.page || pageToLoad)
     } catch (e) {
-      console.error(e)
       setToast({ message: "Error cargando reservas", type: "error" })
     } finally {
       setIsLoading(false)
@@ -37,7 +36,6 @@ export default function Reservations() {
 
   useEffect(() => {
     loadData(1)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const prevPage = () => {

@@ -25,7 +25,6 @@ export function checkRole(role) {
         if (role !== userRole) {
             return res.status(403).json({ message: 'Forbidden: insufficient permissions' })
         }
-        console.log("pasa check role")
         next()
     }
 }

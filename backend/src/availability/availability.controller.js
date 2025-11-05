@@ -68,7 +68,6 @@ export async function getAvailableHours(req, res) {
 
     return res.json({ date, availableHours })
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ error: "Error al obtener disponibilidad" })
   }
 }
@@ -251,7 +250,6 @@ export async function createBlock(req, res) {
 
     res.json(block)
   } catch (e) {
-    console.error(e)
     res.status(500).json({ error: "Error al crear bloqueo" })
   }
 }
@@ -264,7 +262,6 @@ export async function deleteBlock(req, res) {
     })
     res.json({ message: "Bloqueo eliminado correctamente" })
   } catch (e) {
-    console.error(e)
     res.status(500).json({ error: "Error al eliminar bloqueo" })
   }
 }
@@ -297,7 +294,6 @@ export async function getCalendarData(req, res) {
 
     return res.json({ appointments, blockedSlots })
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ error: "Error obteniendo datos del calendario" })
   }
 }
@@ -311,7 +307,6 @@ export async function getBlockedSlots(req, res) {
 
     return res.json({ blockedSlots })
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ error: "Error obteniendo bloqueos" })
   }
 }
@@ -427,7 +422,6 @@ export async function updateBlock(req, res) {
 
     res.json(updated)
   } catch (e) {
-    console.error(e)
     res.status(500).json({ error: "Error al actualizar bloqueo" })
   }
 }

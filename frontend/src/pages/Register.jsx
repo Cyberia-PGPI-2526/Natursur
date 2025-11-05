@@ -52,7 +52,6 @@ export default function Register() {
       >
         <h2 className="text-2xl font-bold text-gray-900 text-center">Registro</h2>
 
-        {/* Nombre */}
         <div className="flex flex-col">
           <label htmlFor="name" className="mb-2 font-medium text-gray-700">
             Nombre
@@ -68,7 +67,6 @@ export default function Register() {
           )}
         </div>
 
-        {/* Email */}
         <div className="flex flex-col">
           <label htmlFor="email" className="mb-2 font-medium text-gray-700">
             Email
@@ -85,7 +83,6 @@ export default function Register() {
           )}
         </div>
 
-        {/* Teléfono */}
         <div className="flex flex-col">
           <label htmlFor="phone_number" className="mb-2 font-medium text-gray-700">
             Número de teléfono
@@ -102,7 +99,6 @@ export default function Register() {
           )}
         </div>
 
-        {/* Contraseña */}
         <div className="flex flex-col">
           <label htmlFor="password" className="mb-2 font-medium text-gray-700">
             Contraseña

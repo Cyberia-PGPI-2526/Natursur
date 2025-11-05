@@ -4,10 +4,8 @@ export const getAvailableHours = async (date) => {
   try {
     const formattedDate = date.split("T")[0]
     const response = await api.get(`availability/${formattedDate}`)
-    console.log(response.data)
     return response.data
   } catch (error) {
-    console.error("Error al obtener horas disponibles:", error)
     return { availableHours: [], error: "No se pudieron cargar las horas disponibles" }
   }
 }
@@ -17,8 +15,6 @@ export const createBlock = async (data) => {
     const response = await api.post("/availability/block", data)
     return response.data
   } catch (error) {
-    console.error("Error al crear bloqueo:", error)
-
     if (error.response) {
       const status = error.response.status
       const msg = error.response.data?.error || "Error inesperado"
@@ -34,8 +30,6 @@ export const deleteBlock = async (id) => {
     const response = await api.delete(`/availability/block/${id}`)
     return response.data
   } catch (error) {
-    console.error("Error al eliminar bloqueo:", error)
-
     if (error.response) {
       const status = error.response.status
       const msg = error.response.data?.error || "Error inesperado"
@@ -51,7 +45,6 @@ export const getCalendarData = async () => {
     const response = await api.get('/availability/calendar/data')
     return response.data
   } catch (error) {
-    console.error("Error al obtener datos del calendario:", error)
     return { appointments: [], blockedSlots: [], error: "Error al cargar datos del calendario" }
   }
 }
@@ -61,7 +54,6 @@ export const getBlockedSlots = async () => {
     const response = await api.get('/availability/blocks')
     return response.data
   } catch (error) {
-    console.error("Error al obtener bloqueos:", error)
     return { blockedSlots: [], error: "Error al cargar bloqueos" }
   }
 }
@@ -71,7 +63,6 @@ export const updateBlock = async (id, data) => {
     const response = await api.put(`/availability/block/${id}`, data)
     return response.data
   } catch (error) {
-    console.error("Error al actualizar bloqueo:", error)
 
     if (error.response) {
       const status = error.response.status

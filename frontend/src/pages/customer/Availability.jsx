@@ -75,7 +75,6 @@ export default function Availability() {
         navigate("/appointments/me")
       }
     } catch (err) {
-      console.error(err)
       showTemporaryError("Ocurrió un error al crear la cita.")
     } finally {
       setCreating(false)

@@ -5,7 +5,6 @@ import { ENV, SECRET_KEY } from "../config/env.js"
 import { Role } from "@prisma/client"
 
 const isProd = ENV === "production"
-const site = isProd ? "lax" : "none"
 
 export async function registerUser(req, res) {
     try {
@@ -76,13 +75,12 @@ export async function loginUser(req, res) {
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             secure: isProd,
-            sameSite: "lax",
+            sameSite: "none",
             maxAge: 15 * 24 * 60 * 60 * 1000
         })
 
         return res.json({ message: 'Login succesfully', token: accessToken, userId: user.id, role: user.role })
     } catch (error) {
-        console.error(error)
         return res.status(500).json({ message: 'Server error' })
     }
 }
@@ -122,13 +120,12 @@ export async function refreshToken(req, res) {
         res.cookie("refreshToken", newRefreshToken, {
             httpOnly: true,
             secure: isProd,
-            sameSite: "lax",
+            sameSite: "none",
             maxAge: 15 * 24 * 60 * 60 * 1000
         })
 
         return res.json({ token: accessToken, userId: user.id, role: user.role })
     } catch (error) {
-        console.error(error);
         return res.status(500).json({ message: "Server error" })
     }
 }
@@ -144,12 +141,11 @@ export async function logoutUser(req, res) {
         res.clearCookie("refreshToken", {
             httpOnly: true,
             secure: isProd,
-            sameSite: "lax"
+            sameSite: "none"
         })
 
         return res.json({ message: "Logged out successfully" })
     } catch (error) {
-        console.error(error);
         return res.status(500).json({ message: "Server error" })
     }
 }
