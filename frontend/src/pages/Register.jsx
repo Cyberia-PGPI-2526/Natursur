@@ -1,133 +1,157 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { registerUser } from "../service/auth.service"
 
+const schema = z
+  .object({
+    name: z.string().min(2, "El nombre es obligatorio"),
+    email: z.string().email("Email inválido"),
+    phone_number: z
+      .string()
+      .regex(/^\+?\d[\d\s]{7,14}$/, "Número de teléfono inválido"),
+    password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
+    repeatPassword: z.string(),
+  })
+  .refine((data) => data.password === data.repeatPassword, {
+    message: "Las contraseñas no coinciden",
+    path: ["repeatPassword"],
+  })
+
 export default function Register() {
-  const [userData, setUserData] = useState({ email: "", name: "", phone_number:"", password: "", repeatPassword: "" })
-  const [error, setError] = useState("")
-
   const navigate = useNavigate()
+  const [showPwd, setShowPwd] = useState(false)
+  const [error, setError] = useState(null)
 
-  const handleChange = (event) => {
-    setUserData({ ...userData, [event.target.name]: event.target.value })
-    setError("")
-  }
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(schema),
+  })
 
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-    if (!checkPhoneNumber(userData.phone_number)) {
-      setError("Número de teléfono inválido")
+  const onSubmit = async (data) => {
+    const res = await registerUser(data)
+    if (res.error) {
+      setError(res.error)
       return
     }
-    if (!checkPasswordMatch()) {
-      setError("Las contraseñas no coinciden")
-      return
-    }
-    await registerUser(userData)
     navigate("/login")
   }
 
-  const showPassword = () => {
-    const password = document.getElementById('password')
-    const repeatPassword = document.getElementById('repeatPassword')
-    password.type == 'text' ? password.type = 'password' : password.type = 'text'
-    repeatPassword.type == 'text' ? repeatPassword.type = 'password' : repeatPassword.type = 'text'
-  }
-
-  const checkPhoneNumber = (phone) => {
-    const phoneRegex = /^\+?\d[\d\s]{7,14}$/
-    return phoneRegex.test(phone)
-  }
-
-  const checkPasswordMatch = () => {
-    return userData.password === userData.repeatPassword
-  }
+  const togglePassword = () => setShowPwd(!showPwd)
 
   return (
-    <div className="flex items-center justify-center mt-4 p-4">
-      <form className="flex flex-col w-full max-w-md md:max-w-lg lg:max-w-xl space-y-4 bg-white p-6 rounded shadow" onSubmit={handleSubmit}>
+    <div className="flex items-center justify-center min-h-[80vh] px-4 bg-gray-50">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="w-full max-w-md md:max-w-lg lg:max-w-xl bg-white p-8 rounded-xl shadow-md flex flex-col gap-6"
+      >
+        <h2 className="text-2xl font-bold text-gray-900 text-center">Registro</h2>
 
-        <h2 className="text-xl font-bold text-gray-800 text-center">Registro</h2>
-
-        {error && (
-          <div className="flex items-center gap-2 p-4 text-red-800 bg-red-50 border-l-4 border-red-500 rounded">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
-            <p className="text-sm font-medium">{error}</p>
-          </div>
-        )}
-
-        <div className="flex flex-col w-full">
-          <label htmlFor="name" className="mb-2 font-medium text-gray-700" >Nombre</label>
+        {/* Nombre */}
+        <div className="flex flex-col">
+          <label htmlFor="name" className="mb-2 font-medium text-gray-700">
+            Nombre
+          </label>
           <input
-            onChange={handleChange}
+            {...register("name")}
             type="text"
-            name="name"
             id="name"
-            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            required
+            className="w-full border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#009BA6]"
           />
+          {errors.name && (
+            <p className="text-red-500 mt-1 text-sm">{errors.name.message}</p>
+          )}
         </div>
 
-        <div className="flex flex-col w-full">
-          <label htmlFor="email" className="mb-2 font-medium text-gray-700" >Email</label>
+        {/* Email */}
+        <div className="flex flex-col">
+          <label htmlFor="email" className="mb-2 font-medium text-gray-700">
+            Email
+          </label>
           <input
-            onChange={handleChange}
+            {...register("email")}
             type="text"
-            name="email"
-            placeholder="jhondoe@gmail.com"
             id="email"
-            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            required
+            placeholder="jhondoe@gmail.com"
+            className="w-full border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#009BA6]"
           />
+          {errors.email && (
+            <p className="text-red-500 mt-1 text-sm">{errors.email.message}</p>
+          )}
         </div>
 
-        <div className="flex flex-col w-full">
-          <label htmlFor="phone" className="mb-2 font-medium text-gray-700" >Número de telefono</label>
+        {/* Teléfono */}
+        <div className="flex flex-col">
+          <label htmlFor="phone_number" className="mb-2 font-medium text-gray-700">
+            Número de teléfono
+          </label>
           <input
-            onChange={handleChange}
+            {...register("phone_number")}
             type="text"
-            name="phone_number"
-            placeholder="+34 600 000 000 / 600000000"
             id="phone_number"
-            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            required
+            placeholder="+34 123456789"
+            className="w-full border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#009BA6]"
           />
+          {errors.phone_number && (
+            <p className="text-red-500 mt-1 text-sm">{errors.phone_number.message}</p>
+          )}
         </div>
 
-        <div className="flex flex-col w-full">
-          <label htmlFor="password" className="mb-2 font-medium text-gray-700" >Contraseña</label>
-          <input
-            onChange={handleChange}
-            type="password"
-            name="password"
-            id="password"
-            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            required
-          />
+        {/* Contraseña */}
+        <div className="flex flex-col">
+          <label htmlFor="password" className="mb-2 font-medium text-gray-700">
+            Contraseña
+          </label>
+          <div className="relative w-full">
+            <input
+              {...register("password")}
+              type={showPwd ? "text" : "password"}
+              id="password"
+              className="w-full border border-gray-200 rounded-lg p-3 pr-12 focus:outline-none focus:ring-2 focus:ring-[#009BA6]"
+            />
+            <button
+              type="button"
+              onClick={togglePassword}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#009BA6] font-semibold hover:text-[#00777F] transition"
+            >
+              {showPwd ? "Ocultar" : "Mostrar"}
+            </button>
+          </div>
+          {errors.password && (
+            <p className="text-red-500 mt-1 text-sm">{errors.password.message}</p>
+          )}
         </div>
 
-        <div className="flex flex-col w-full">
-          <label htmlFor="repeatPassword" className="mb-2 font-medium text-gray-700" >Repite la contraseña</label>
+        {/* Repite contraseña */}
+        <div className="flex flex-col">
+          <label htmlFor="repeatPassword" className="mb-2 font-medium text-gray-700">
+            Repite la contraseña
+          </label>
           <input
-            onChange={handleChange}
-            type="password"
-            name="repeatPassword"
+            {...register("repeatPassword")}
+            type={showPwd ? "text" : "password"}
             id="repeatPassword"
-            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            required
+            className="w-full border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#009BA6]"
           />
+          {errors.repeatPassword && (
+            <p className="text-red-500 mt-1 text-sm">{errors.repeatPassword.message}</p>
+          )}
         </div>
 
-        <button type="button" onClick={showPassword}>Ver contraseña</button>
+        {error && <p className="text-red-500 text-center">{error}</p>}
 
+        {/* Botón submit */}
         <button
-          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition-colors duration-200"
-          type="submit">
-          Registro
+          type="submit"
+          className="bg-[#009BA6] hover:bg-[#00777F] text-white font-semibold py-3 rounded-lg transition"
+        >
+          Registrarse
         </button>
-
       </form>
     </div>
   )
