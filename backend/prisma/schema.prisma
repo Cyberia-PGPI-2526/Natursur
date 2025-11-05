@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {  
@@ -36,10 +36,18 @@ model Service {
   id                Int      @id @default(autoincrement())
   name              String   @unique
   description       String?
-  duration_minutes  Int      
-  price_cents       Int      @default(0) 
-  
+  disabled          Boolean  @default(false)
   appointments Appointment[]
+}
+
+
+enum SessionType {
+  MIN_40
+  MIN_60
+  MIN_90
+  PREMIUM_60
+  DOMICILIO_60
+  PACK_3x40
 }
 
 model Availability {
@@ -66,6 +74,7 @@ model Appointment {
   appointment_date  DateTime
   start_time        DateTime
   end_time          DateTime
+  session_type      SessionType          @default(MIN_60)
   state             AppointmentState     @default(PENDING) 
 
   client            User     @relation("ClientAppointments", fields: [clientId], references: [id])
@@ -76,6 +85,17 @@ model Appointment {
 
   @@unique([appointment_date, start_time, clientId])
 } 
+
+model BlockedSlot {
+  id          Int      @id @default(autoincrement())
+  date        DateTime // Fecha del día bloqueado
+  start_time  DateTime? // Hora de inicio del bloqueo
+  end_time    DateTime? // Hora de fin del bloqueo
+  reason      String?  // (opcional) descripción del motivo
+  full_day    Boolean  @default(false) // Si true, bloquea todo el día
+  createdAt   DateTime @default(now())
+
+}
 
 enum AppointmentState {
   PENDING

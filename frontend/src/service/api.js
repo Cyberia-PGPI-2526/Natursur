@@ -26,9 +26,7 @@ api.interceptors.response.use(
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
-      console.log("refresco automático")
-      await refreshToken() 
-      console.log("Se ha refrescado el token")
+      await refreshToken()
       return api(originalRequest)
     }
     return Promise.reject(error)
