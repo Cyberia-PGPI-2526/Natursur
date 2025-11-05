@@ -2,6 +2,7 @@ import express from "express"
 import helmet from "helmet"
 import cookieParser from "cookie-parser"
 import cors from 'cors'
+import { ORIGIN } from "./config/env.js"
 import { userRoutes } from "./user/user.routes.js"
 import { authRoutes } from "./auth/auth.routes.js"
 import { appointmentRoutes } from "./appointment/appointment.route.js"
@@ -18,7 +19,7 @@ app.use(cookieParser())
 
 
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: ORIGIN,
   credentials: true,
 }))
 
