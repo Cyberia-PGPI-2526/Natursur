@@ -18,7 +18,6 @@ const schema = z.object({
 })
 
 export default function Users() {
-
   const [users, setUsers] = useState([])
   const [page, setPage] = useState(null)
   const [totalPages, setTotalPages] = useState(null)
@@ -37,10 +36,7 @@ export default function Users() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        let currentPage = page
-        if (!currentPage) {
-          currentPage = 1
-        }
+        let currentPage = page || 1
         const res = await getUsers(currentPage)
         setUsers(res.users || [])
         setPage(res.page)
@@ -107,7 +103,7 @@ export default function Users() {
 
   const onSubmit = async (data) => {
     setIsSubmitting(true)
-    
+
     const res = await updateUser(editingUser.id, data)
 
     setIsSubmitting(false)
@@ -120,8 +116,7 @@ export default function Users() {
     setToast({ message: "Usuario actualizado exitosamente", type: "success" })
     setIsModalOpen(false)
     setEditingUser(null)
-    
-    // Refresh users list
+
     const currentPage = page || 1
     const refreshRes = await getUsers(currentPage)
     setUsers(refreshRes.users || [])
@@ -129,7 +124,7 @@ export default function Users() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[60vh]">
+      <div className="flex justify-center items-center min-h-screen bg-[#f9fafb]">
         <div className="text-xl text-[#009BA6]">Cargando usuarios...</div>
       </div>
     )
@@ -137,20 +132,23 @@ export default function Users() {
 
   if (!users.length) {
     return (
-      <div className="flex justify-center items-center min-h-[60vh]">
+      <div className="flex justify-center items-center min-h-screen bg-[#f9fafb]">
         <div className="text-xl text-gray-500">No se encontraron usuarios.</div>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-6 py-12 bg-[#f9fafb] rounded-lg shadow-xl">
+
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-[#009BA6]">Gestión de Usuarios</h1>
+        <div className="flex justify-between items-center bg-[#009BA6] text-white py-4 px-6 rounded-lg shadow-md">
+          <h1 className="text-4xl font-bold">Gestión de Usuarios</h1>
+        </div>
         <p className="text-gray-600 mt-2">Administra los usuarios del sistema</p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full">
             <thead className="bg-[#009BA6] text-white">
@@ -164,16 +162,14 @@ export default function Users() {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {users.map((user, index) => (
-                <tr key={user.id} className="hover:bg-gray-50 transition">
+                <tr key={user.id} className="hover:bg-gray-50 transition duration-300">
                   <td className="py-4 px-6 text-gray-700">{(page - 1) * 10 + index + 1}</td>
                   <td className="py-4 px-6 text-gray-900 font-medium">{user.name}</td>
                   <td className="py-4 px-6 text-gray-700">{user.email}</td>
                   <td className="py-4 px-6">
                     <span
                       className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                        user.role === "ADMIN"
-                          ? "bg-[#009BA6] text-white"
-                          : "bg-green-100 text-green-700"
+                        user.role === "ADMIN" ? "bg-[#009BA6] text-white" : "bg-green-100 text-green-700"
                       }`}
                     >
                       {user.role}
@@ -183,13 +179,13 @@ export default function Users() {
                     <div className="flex justify-center gap-2">
                       <button
                         onClick={() => handleEdit(user)}
-                        className="bg-[#009BA6] text-white px-4 py-2 rounded-lg hover:bg-[#007a82] transition font-medium"
+                        className="bg-[#009BA6] text-white px-4 py-2 rounded-lg hover:bg-[#007a82] transition duration-300"
                       >
                         Editar
                       </button>
                       <button
                         onClick={() => handleDeleteClick(user)}
-                        className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition font-medium"
+                        className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition duration-300"
                       >
                         Eliminar
                       </button>
@@ -202,10 +198,9 @@ export default function Users() {
         </div>
       </div>
 
-      {/* Paginación */}
       <div className="flex justify-center items-center mt-8 gap-4">
         <button
-          className="px-6 py-3 bg-[#009BA6] text-white rounded-lg hover:bg-[#007a82] transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-3 bg-[#009BA6] text-white rounded-lg hover:bg-[#007a82] transition duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={prevPage}
           disabled={page <= 1}
         >
@@ -215,7 +210,7 @@ export default function Users() {
           Página {page} de {totalPages}
         </span>
         <button
-          className="px-6 py-3 bg-[#009BA6] text-white rounded-lg hover:bg-[#007a82] transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-3 bg-[#009BA6] text-white rounded-lg hover:bg-[#007a82] transition duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={nextPage}
           disabled={page === totalPages}
         >
@@ -244,9 +239,7 @@ export default function Users() {
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#009BA6] border-gray-300"
               disabled={isSubmitting}
             />
-            {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
-            )}
+            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
           </div>
 
           <div>
@@ -260,9 +253,7 @@ export default function Users() {
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#009BA6] border-gray-300"
               disabled={isSubmitting}
             />
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
-            )}
+            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
           </div>
 
           <div>
@@ -278,9 +269,7 @@ export default function Users() {
               <option value="CUSTOMER">Cliente</option>
               <option value="ADMIN">Administrador</option>
             </select>
-            {errors.role && (
-              <p className="text-red-500 text-sm mt-1">{errors.role.message}</p>
-            )}
+            {errors.role && <p className="text-red-500 text-sm mt-1">{errors.role.message}</p>}
           </div>
 
           <div>
@@ -295,9 +284,7 @@ export default function Users() {
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#009BA6] border-gray-300"
               disabled={isSubmitting}
             />
-            {errors.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
-            )}
+            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
             <p className="text-gray-500 text-xs mt-1">Solo completa si deseas cambiar la contraseña</p>
           </div>
 
@@ -320,6 +307,7 @@ export default function Users() {
           </div>
         </form>
       </Modal>
+
       <DeleteUserModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
