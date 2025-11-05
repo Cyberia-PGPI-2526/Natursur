@@ -11,7 +11,6 @@ export default function Profile() {
             try {
                 const res = await getUserProfile()
                 setUserData(res)
-
             } catch (error) {
                 console.error(error)
             } finally {
@@ -21,29 +20,32 @@ export default function Profile() {
         profile()
     }, [])
 
-    if (isLoading) return <p className="text-center mt-10 text-gray-500">Loading...</p>
+    if (isLoading) return <p className="text-center mt-10 text-gray-500">Cargando...</p>
 
-    if (!userData) return <p className="text-center mt-10 text-red-500">Error loading profile</p>
+    if (!userData) return <p className="text-center mt-10 text-red-500">Error al cargar el perfil</p>
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-[70vh] p-4">
-            <div className="bg-white shadow-lg rounded-2xl p-6 w-full max-w-sm flex flex-col items-center text-center">
-                <div className="w-24 h-24 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 text-4xl font-bold mb-4">
+        <div className="flex items-center justify-center min-h-screen bg-[#f4f4f4] p-4">
+            <div className="bg-white shadow-2xl rounded-3xl p-8 w-full max-w-lg flex flex-col items-center text-center border-t-4 border-[#009BA6]">
+                
+                <div className="w-32 h-32 rounded-full bg-gradient-to-r from-[#009BA6] to-[#007a82] flex items-center justify-center text-white text-4xl font-semibold mb-6">
                     {userData.name ? userData.name[0].toUpperCase() : "?"}
                 </div>
-                <h1 className="text-2xl font-semibold text-gray-800">{userData.name}</h1>
-                <p className="text-gray-500 mb-4">{userData.email}</p>
 
-                <div className="flex flex-col gap-2 mt-4 w-full">
+                <h1 className="text-4xl font-semibold text-[#009BA6]">{userData.name}</h1>
+                <p className="text-lg text-gray-600 mt-2">{userData.email}</p>
+
+
+                <div className="flex flex-col gap-6 mt-6 w-full">
                     <Link
                         to="/edit-profile"
-                        className="bg-blue-500 text-white py-2 rounded-xl hover:bg-blue-600 transition"
+                        className="bg-[#009BA6] text-white py-3 px-6 rounded-xl hover:bg-[#007a82] transition duration-300 transform hover:scale-105"
                     >
-                        Edit Profile
+                        Editar Perfil
                     </Link>
                     <Link
                         to="/"
-                        className="text-blue-500 hover:underline text-sm"
+                        className="text-[#009BA6] hover:underline text-sm hover:text-[#007a82] transition duration-300"
                     >
                         ← Volver al inicio
                     </Link>
