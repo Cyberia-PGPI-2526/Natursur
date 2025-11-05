@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react"
 import Toast from "../../components/Toast"
-import { getAppointments, confirmAppointment, cancelAppointment } from "../../service/appointment.service"
+import {
+  getAppointments,
+  confirmAppointment,
+  cancelAppointment,
+} from "../../service/appointment.service"
 
 export default function Reservations() {
   const [appointments, setAppointments] = useState([])
@@ -9,14 +13,18 @@ export default function Reservations() {
   const [totalPages, setTotalPages] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
   const [toast, setToast] = useState(null)
+  const [showCancelModal, setShowCancelModal] = useState(false)
+  const [selectedId, setSelectedId] = useState(null)
+  const [canceling, setCanceling] = useState(false)
 
   const loadData = async (pageToLoad = page) => {
     setIsLoading(true)
     try {
-  const res = await getAppointments(pageToLoad, limit)
-  // Ocultar canceladas y completadas de la vista de admin
-  const visible = (res.appointments || []).filter(a => a.state !== 'CANCELED' && a.state !== 'COMPLETED')
-  setAppointments(visible)
+      const res = await getAppointments(pageToLoad, limit)
+      const visible = (res.appointments || []).filter(
+        (a) => a.state !== "CANCELED" && a.state !== "COMPLETED"
+      )
+      setAppointments(visible)
       setTotalPages(res.totalPages || 1)
       setPage(res.page || pageToLoad)
     } catch (e) {
@@ -49,20 +57,29 @@ export default function Reservations() {
       return
     }
     setToast({ message: "Cita confirmada", type: "success" })
-    // actualizar en memoria
-    setAppointments((prev) => prev.map(a => a.id === id ? { ...a, state: "CONFIRMED" } : a))
+    setAppointments((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, state: "CONFIRMED" } : a))
+    )
   }
 
-  const handleCancel = async (id) => {
-    const ok = window.confirm("¿Seguro que deseas cancelar esta reserva?")
-    if (!ok) return
-    const res = await cancelAppointment(id)
+  const openCancelModal = (id) => {
+    setSelectedId(id)
+    setShowCancelModal(true)
+  }
+
+  const handleCancel = async () => {
+    if (!selectedId) return
+    setCanceling(true)
+    const res = await cancelAppointment(selectedId)
     if (res.error) {
       setToast({ message: res.error, type: "error" })
-      return
+    } else {
+      setToast({ message: "Reserva cancelada", type: "success" })
+      setAppointments((prev) => prev.filter((a) => a.id !== selectedId))
     }
-    setToast({ message: "Reserva cancelada", type: "success" })
-    setAppointments((prev) => prev.filter(a => a.id !== id))
+    setCanceling(false)
+    setShowCancelModal(false)
+    setSelectedId(null)
   }
 
   if (isLoading) {
@@ -74,7 +91,7 @@ export default function Reservations() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 relative">
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-[#009BA6]">Reservas</h1>
         <p className="text-gray-600 mt-2">Gestiona las citas de los clientes</p>
@@ -85,7 +102,6 @@ export default function Reservations() {
           <table className="min-w-full">
             <thead className="bg-[#009BA6] text-white">
               <tr>
-                <th className="py-4 px-6 text-left font-semibold">#</th>
                 <th className="py-4 px-6 text-left font-semibold">Fecha</th>
                 <th className="py-4 px-6 text-left font-semibold">Inicio</th>
                 <th className="py-4 px-6 text-left font-semibold">Fin</th>
@@ -98,7 +114,10 @@ export default function Reservations() {
             <tbody className="divide-y divide-gray-200">
               {appointments.length === 0 && (
                 <tr>
-                  <td className="py-6 px-6 text-center text-gray-600" colSpan="8">
+                  <td
+                    className="py-6 px-6 text-center text-gray-600"
+                    colSpan="8"
+                  >
                     No hay reservas registradas.
                   </td>
                 </tr>
@@ -109,26 +128,45 @@ export default function Reservations() {
                 const end = new Date(a.end_time)
                 return (
                   <tr key={a.id} className="hover:bg-gray-50 transition">
-                    <td className="py-4 px-6 text-gray-700">{(page - 1) * limit + idx + 1}</td>
-                    <td className="py-4 px-6 text-gray-900 font-medium">{date.toLocaleDateString()}</td>
-                    <td className="py-4 px-6 text-gray-700">{start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
-                    <td className="py-4 px-6 text-gray-700">{end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
-                    <td className="py-4 px-6 text-gray-700">{a.client?.name} ({a.client?.email})</td>
-                    <td className="py-4 px-6 text-gray-700">{a.service?.name}</td>
+                    <td className="py-4 px-6 text-gray-900 font-medium">
+                      {date.toLocaleDateString()}
+                    </td>
+                    <td className="py-4 px-6 text-gray-700">
+                      {start.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </td>
+                    <td className="py-4 px-6 text-gray-700">
+                      {end.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </td>
+                    <td className="py-4 px-6 text-gray-700">{a.client?.name}</td>
+                    <td className="py-4 px-6 text-gray-700">
+                      {a.service?.name}
+                    </td>
                     <td className="py-4 px-6">
-                      <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                        a.state === 'CONFIRMED' ? 'bg-green-100 text-green-700' :
-                        a.state === 'CANCELED' ? 'bg-red-100 text-red-700' :
-                        a.state === 'COMPLETED' ? 'bg-blue-100 text-blue-700' :
-                        a.state === 'NOT_ASSISTED' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-gray-100 text-gray-700'
-                      }`}>
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                          a.state === "CONFIRMED"
+                            ? "bg-green-100 text-green-700"
+                            : a.state === "CANCELED"
+                            ? "bg-red-100 text-red-700"
+                            : a.state === "COMPLETED"
+                            ? "bg-blue-100 text-blue-700"
+                            : a.state === "NOT_ASSISTED"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : "bg-gray-100 text-gray-700"
+                        }`}
+                      >
                         {a.state}
                       </span>
                     </td>
                     <td className="py-4 px-6">
                       <div className="flex justify-center gap-2">
-                        {a.state !== 'CONFIRMED' && (
+                        {a.state !== "CONFIRMED" && (
                           <button
                             onClick={() => handleConfirm(a.id)}
                             className="bg-[#009BA6] text-white px-4 py-2 rounded-lg hover:bg-[#007a82] transition font-medium"
@@ -137,7 +175,7 @@ export default function Reservations() {
                           </button>
                         )}
                         <button
-                          onClick={() => handleCancel(a.id)}
+                          onClick={() => openCancelModal(a.id)}
                           className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition font-medium"
                         >
                           Cancelar
@@ -173,8 +211,43 @@ export default function Reservations() {
         </button>
       </div>
 
+      {/* Modal de confirmación de cancelación */}
+      {showCancelModal && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 shadow-lg w-80 text-center">
+            <h3 className="text-lg font-semibold text-[#009BA6] mb-2">
+              Cancelar reserva
+            </h3>
+            <p className="text-gray-700 mb-4">
+              ¿Seguro que deseas cancelar esta cita? Esta acción no se puede
+              deshacer.
+            </p>
+
+            <div className="flex justify-around">
+              <button
+                onClick={handleCancel}
+                disabled={canceling}
+                className="bg-[#009BA6] text-white px-4 py-2 rounded-lg hover:bg-[#00777F] transition"
+              >
+                {canceling ? "Cancelando..." : "Sí, cancelar"}
+              </button>
+              <button
+                onClick={() => setShowCancelModal(false)}
+                className="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-400 transition"
+              >
+                No, volver
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {toast && (
-        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
       )}
     </div>
   )
