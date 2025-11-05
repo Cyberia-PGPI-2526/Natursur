@@ -15,6 +15,7 @@ import Products from './pages/Products'
 import { useEffect, useState } from 'react'
 import { refreshToken } from './service/auth.service'
 import AppCalendar from './pages/customer/Calendar'
+import AdminCalendar from './pages/admin/Calendar'
 import Availability from './pages/customer/Availability'
 import MyAppointments from './pages/customer/MyAppointments'
 import Register from './pages/Register'
@@ -45,6 +46,7 @@ function App() {
           <Route path='/reservations' element={<PrivateRoute><AdminReservations /></PrivateRoute>} />
           <Route path='/services' element={<PrivateRoute><AdminServices /></PrivateRoute>} />
           <Route path='/products' element={<PrivateRoute><Products /></PrivateRoute>} />
+          <Route path='/calendar' element={<PrivateRoute><AdminCalendar /></PrivateRoute>} />
         </>
       )
       break
@@ -55,7 +57,7 @@ function App() {
           <Route path='/services' element={<PrivateRoute><CustomerServices /></PrivateRoute>} />
           <Route path='/products' element={<PrivateRoute><Products /></PrivateRoute>} />
           <Route path='/reservations' element={<PrivateRoute><Login /></PrivateRoute>} />
-
+          <Route path='/calendar' element={<PrivateRoute><AppCalendar /></PrivateRoute>} />
         </>
       )
       break
@@ -66,14 +68,13 @@ function App() {
   if (!token) {
     publicRoutes = (
       <>
-        <Route path='/login' element={<Login />} />
-        <Route path='/register' element={<Register />} />
+        <Route path='/services' element={<CustomerServices />} />
+        <Route path='/products' element={<Products />} />
       </>
     )
   } else {
     privateRoutes = (
       <>
-        <Route path='/calendar' element={<PrivateRoute><AppCalendar /></PrivateRoute>} />
         <Route path='/profile' element={<PrivateRoute><Profile /></PrivateRoute>} />
         <Route path="/availability/:date" element={<PrivateRoute><Availability /></PrivateRoute>} />
       </>
@@ -94,6 +95,8 @@ function App() {
       <main className='flex-1 mx-auto w-full max-w-7xl px-4 py-6 md:px-8 lg:px-16'>
         <Routes>
           <Route path='/' element={<Home />} />
+          <Route path='/login' element={<Login />} />
+          <Route path='/register' element={<Register />} />
           {adminRoutes}
           {customerRoutes}
           {privateRoutes}

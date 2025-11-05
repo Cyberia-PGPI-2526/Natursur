@@ -45,3 +45,40 @@ export const deleteBlock = async (id) => {
     return { error: "Error de conexión con el servidor" }
   }
 }
+
+export const getCalendarData = async () => {
+  try {
+    const response = await api.get('/availability/calendar/data')
+    return response.data
+  } catch (error) {
+    console.error("Error al obtener datos del calendario:", error)
+    return { appointments: [], blockedSlots: [], error: "Error al cargar datos del calendario" }
+  }
+}
+
+export const getBlockedSlots = async () => {
+  try {
+    const response = await api.get('/availability/blocks')
+    return response.data
+  } catch (error) {
+    console.error("Error al obtener bloqueos:", error)
+    return { blockedSlots: [], error: "Error al cargar bloqueos" }
+  }
+}
+
+export const updateBlock = async (id, data) => {
+  try {
+    const response = await api.put(`/availability/block/${id}`, data)
+    return response.data
+  } catch (error) {
+    console.error("Error al actualizar bloqueo:", error)
+
+    if (error.response) {
+      const status = error.response.status
+      const msg = error.response.data?.error || "Error inesperado"
+      return { error: msg, status }
+    }
+
+    return { error: "Error de conexión con el servidor" }
+  }
+}
