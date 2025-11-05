@@ -1,4 +1,5 @@
 import { prisma } from "../config/db.js"
+import bcrypt from "bcrypt"
 
 export async function getProfile(req, res) {
   try {

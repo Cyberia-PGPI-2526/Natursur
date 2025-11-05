@@ -31,7 +31,6 @@ export default function User() {
         const fetchUser = async () => {
             try {
                 const res = await getUser(id)
-
                 reset({
                     name: res.name,
                     email: res.email,
@@ -63,61 +62,63 @@ export default function User() {
 
     if (isLoading) {
         return (
-            <div className="flex justify-center items-center min-h-[60vh]">
+            <div className="flex justify-center items-center min-h-[60vh] bg-[#f7f7f7]">
                 <div className="text-xl text-[#009BA6]">Cargando usuario...</div>
             </div>
         )
     }
 
     return (
-        <div className="container mx-auto px-4 py-8 max-w-2xl">
-            <div className="mb-8">
-                <h1 className="text-4xl font-bold text-[#009BA6]">Editar Usuario</h1>
-                <p className="text-gray-600 mt-2">Modifica la información del usuario</p>
-            </div>
+        <div className="flex justify-center items-center min-h-screen bg-[#f7f7f7]">
+            <div className="w-full max-w-lg bg-white rounded-xl shadow-lg p-8">
+                <div className="flex justify-between items-center mb-8">
+                    <h1 className="text-3xl font-semibold text-[#009BA6]">Editar Usuario</h1>
+                    <button
+                        onClick={() => navigate("/users")}
+                        className="text-[#009BA6] text-xl font-semibold hover:text-[#007a82] transition duration-300"
+                    >
+                        ✖
+                    </button>
+                </div>
+                <p className="text-gray-600 text-center mb-6">Modifica la información del usuario</p>
 
-            <div className="bg-white rounded-lg shadow-md p-8">
-                <form
-                    className="space-y-6"
-                    onSubmit={handleSubmit(onSubmit)}
-                >
-                    <div>
-                        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                            Nombre
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                    <div className="relative">
+                        <label htmlFor="name" className="block text-lg font-medium text-gray-700 mb-2">
+                            Nombre *
                         </label>
                         <input
                             {...register("name")}
                             type="text"
                             id="name"
-                            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#009BA6] focus:border-transparent"
-                            required
+                            className="w-full border border-gray-300 rounded-lg p-4 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#009BA6] transition duration-300"
+                            placeholder="Escribe el nombre"
                         />
                         {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
                     </div>
 
-                    <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                            Email
+                    <div className="relative">
+                        <label htmlFor="email" className="block text-lg font-medium text-gray-700 mb-2">
+                            Email *
                         </label>
                         <input
                             {...register("email")}
                             type="email"
                             id="email"
-                            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#009BA6] focus:border-transparent"
-                            required
+                            className="w-full border border-gray-300 rounded-lg p-4 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#009BA6] transition duration-300"
+                            placeholder="Escribe el email"
                         />
                         {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
                     </div>
 
-                    <div>
-                        <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
-                            Rol
+                    <div className="relative">
+                        <label htmlFor="role" className="block text-lg font-medium text-gray-700 mb-2">
+                            Rol *
                         </label>
                         <select
                             {...register("role")}
                             id="role"
-                            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#009BA6] focus:border-transparent"
-                            required
+                            className="w-full border border-gray-300 rounded-lg p-4 text-gray-700 focus:ring-2 focus:ring-[#009BA6] transition duration-300"
                         >
                             <option value="CUSTOMER">Cliente</option>
                             <option value="ADMIN">Administrador</option>
@@ -125,8 +126,8 @@ export default function User() {
                         {errors.role && <p className="text-red-500 text-sm mt-1">{errors.role.message}</p>}
                     </div>
 
-                    <div>
-                        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                    <div className="relative">
+                        <label htmlFor="password" className="block text-lg font-medium text-gray-700 mb-2">
                             Contraseña
                         </label>
                         <input
@@ -134,44 +135,44 @@ export default function User() {
                             type="password"
                             id="password"
                             placeholder="Dejar en blanco para mantener la actual"
-                            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#009BA6] focus:border-transparent"
+                            className="w-full border border-gray-300 rounded-lg p-4 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#009BA6] transition duration-300"
                         />
                         {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
                         <p className="text-gray-500 text-xs mt-1">Solo completa si deseas cambiar la contraseña</p>
                     </div>
 
                     {error && (
-                        <div className="bg-red-100 text-red-700 p-3 rounded-lg">
+                        <div className="bg-red-100 text-red-700 p-3 rounded-lg shadow-md">
                             {error}
                         </div>
                     )}
 
-                    <div className="flex gap-3 pt-4">
+                    <div className="flex gap-4 pt-6">
                         <button
                             type="button"
                             onClick={() => navigate("/users")}
-                            className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-4 rounded-lg transition"
+                            className="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-5 rounded-lg transition duration-300"
                         >
                             Cancelar
                         </button>
 
                         <button
-                            className="flex-1 bg-[#009BA6] hover:bg-[#007a82] text-white font-semibold py-3 px-4 rounded-lg transition"
                             type="submit"
+                            className="w-full bg-[#009BA6] text-white font-semibold py-3 px-5 rounded-lg shadow-lg hover:bg-[#007a82] transition duration-300"
                         >
                             Guardar Cambios
                         </button>
                     </div>
                 </form>
-            </div>
 
-            {toast && (
-                <Toast
-                    message={toast.message}
-                    type={toast.type}
-                    onClose={() => setToast(null)}
-                />
-            )}
+                {toast && (
+                    <Toast
+                        message={toast.message}
+                        type={toast.type}
+                        onClose={() => setToast(null)}
+                    />
+                )}
+            </div>
         </div>
     )
 }
