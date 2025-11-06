@@ -58,6 +58,7 @@ export default function Navbar() {
     publicRoutes = (
       <>
         <NavLink className={linkClass} to="/" onClick={() => setIsOpen(false)}>Inicio</NavLink>
+        <NavLink className={linkClass} to="/products" onClick={() => setIsOpen(false)}>Productos</NavLink>
         <NavLink className={linkClass} to="/login" onClick={() => setIsOpen(false)}>Login</NavLink>
         <NavLink className={linkClass} to="/register" onClick={() => setIsOpen(false)}>Registro</NavLink>
       </>
