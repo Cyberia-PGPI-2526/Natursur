@@ -81,8 +81,7 @@ export default function Availability() {
         start_time: start.toISOString(),
         serviceId: parseInt(treatment)
       }
-
-      console.log(payload)
+      
       const response = await createAppointment(payload)
 
       if (response?.error) {
