@@ -21,7 +21,7 @@ async function main() {
     where: { email: 'admin@example.com' },
     update: {},
     create: {
-      email: 'admin@example.com',
+      email: 'admin@example.es',
       name: 'Admin User',
       phone_number: '123456789',
       password: hashedAdminPassword,
@@ -35,7 +35,7 @@ async function main() {
       where: { email: `customer${i}@example.com` },
       update: {},
       create: {
-        email: `customer${i}@example.com`,
+        email: `customer${i}@example.es`,
         name: `Customer ${i}`,
         phone_number: `000000${i}`,
         password: hashedCustomerPassword,
