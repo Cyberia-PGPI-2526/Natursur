@@ -57,13 +57,13 @@ export default function Availability() {
   const handleConfirm = async () => {
     setCreating(true)
     try {
-      const datePart = date.substring(0, 11)
-      const timePart = selectedHour + ":00.000"
-      const startTime = datePart + timePart
+      const [year, month, day] = date.split("-")
+      const start = new Date(year, month - 1, day, selectedHour, 0, 0, 0)
+      const end = new Date(start.getTime() + 60 * 60 * 1000)
 
       const payload = {
         appointment_date: date,
-        start_time: startTime,
+        start_time: startTime.toISOString(),
         serviceId: parseInt(treatment)
       }
 
