@@ -16,6 +16,7 @@ export async function checkAppointmentConflict(req, res, next) {
     const conflictQuery = {
       end_time: { gt: newStartTime },
       start_time: { lt: newEndTime },
+      state: { not: "CANCELLED"}
     }
 
     if (appointmentId) {
