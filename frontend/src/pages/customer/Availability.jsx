@@ -57,16 +57,32 @@ export default function Availability() {
   const handleConfirm = async () => {
     setCreating(true)
     try {
-      const [year, month, day] = date.split("-")
-      const start = new Date(year, month - 1, day, selectedHour, 0, 0, 0)
-      const end = new Date(start.getTime() + 60 * 60 * 1000)
+
+      const d = new Date(date)
+      if (isNaN(d)) {
+        showTemporaryError("Fecha inválida.")
+        return
+      }
+
+      const year = d.getFullYear()
+      const month = d.getMonth() + 1
+      const day = d.getDate()
+
+      const [hour, minute] = selectedHour.split(":").map(Number)
+
+      const start = new Date(year, month - 1, day, hour, minute, 0, 0)
+      if (isNaN(start)) {
+        showTemporaryError("Hora inválida.")
+        return
+      }
 
       const payload = {
         appointment_date: date,
-        start_time: startTime.toISOString(),
+        start_time: start.toISOString(),
         serviceId: parseInt(treatment)
       }
 
+      console.log(payload)
       const response = await createAppointment(payload)
 
       if (response?.error) {
