@@ -23,6 +23,7 @@ async function main() {
     create: {
       email: 'admin@example.com',
       name: 'Admin User',
+      phone_number: '123456789',
       password: hashedAdminPassword,
       role: Role.ADMIN,
     },
@@ -36,6 +37,7 @@ async function main() {
       create: {
         email: `customer${i}@example.com`,
         name: `Customer ${i}`,
+        phone_number: `000000${i}`,
         password: hashedCustomerPassword,
         role: Role.CUSTOMER,
       },
