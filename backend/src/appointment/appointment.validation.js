@@ -1,13 +1,6 @@
 import { check } from 'express-validator'
 import { AppointmentState } from "@prisma/client"
 
-const timeCheck = (field) =>
-  check(field)
-    .exists()
-    .withMessage(`${field} es requerido.`)
-    .isISO8601()
-    .toDate()
-
 export const createAppointmentValidation = [
   check('appointment_date')
     .exists()

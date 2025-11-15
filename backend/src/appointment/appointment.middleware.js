@@ -11,8 +11,8 @@ export async function checkAppointmentConflict(req, res, next) {
     }
 
     const [year, month, day] = appointment_date.split("-").map(Number)
-    const newStartTime = new Date(year, month - 1, day, start_hour, 0, 0)
-
+    // Convertimos a UTC para evitar desfase
+    const newStartTime = new Date(Date.UTC(year, month - 1, day, start_hour, 0, 0))
     const newEndTime = addMinutes(newStartTime, 59)
 
     const conflictQuery = {

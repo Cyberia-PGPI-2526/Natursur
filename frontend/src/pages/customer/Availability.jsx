@@ -35,7 +35,6 @@ export default function Availability() {
         if (data?.error) setError(data.error)
         else setServices(data.services || [])
       } catch (err) {
-        console.error("ERROR fetch services:", err)
         setError("Error cargando tratamientos")
       } finally {
         setLoadingServices(false)
@@ -56,8 +55,7 @@ export default function Availability() {
         } else {
           setHours(data.availableHours || [])
         }
-      } catch (err) {
-        console.error("ERROR fetch hours:", err)
+      } catch {
         setError("Error cargando horas")
         setHours([])
       } finally {
@@ -76,14 +74,9 @@ export default function Availability() {
         return
       }
 
-      const [year, month, day] = rawDate.split("-").map(Number)
-      const hour = parseInt(selectedHour.split(":")[0], 10)
-
-      const start = new Date(year, month - 1, day, hour, 0, 0, 0)
-
       const payload = {
         appointment_date: rawDate,
-        start_hour: hour,
+        start_hour: parseInt(selectedHour.split(":")[0], 10),
         serviceId: parseInt(treatment)
       }
 
@@ -96,8 +89,7 @@ export default function Availability() {
       } else {
         navigate("/appointments/me")
       }
-    } catch (err) {
-      console.error("ERROR handleConfirm:", err)
+    } catch {
       showTemporaryError("Ocurrió un error al crear la cita.")
     } finally {
       setCreating(false)
@@ -105,8 +97,6 @@ export default function Availability() {
       setSelectedHour(null)
     }
   }
-
-
 
   return (
     <div className="max-w-md mx-auto mt-6 p-6 bg-white rounded-xl shadow-lg relative">

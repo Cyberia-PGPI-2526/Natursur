@@ -12,32 +12,38 @@ export default function MyAppointments() {
     const fetchData = async () => {
       setLoading(true)
       setError("")
-      const data = await getMyAppointments(page, 5)
-      if (data.error) {
-        setError(data.error)
-      } else {
-        setAppointments(data.appointments || [])
-        setTotalPages(data.totalPages || 1)
+      try {
+        const data = await getMyAppointments(page, 5)
+        if (data.error) {
+          setError(data.error)
+        } else {
+          setAppointments(data.appointments || [])
+          setTotalPages(data.totalPages || 1)
+        }
+      } catch (err) {
+        setError("Error cargando citas")
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
 
     fetchData()
   }, [page])
 
+  // Formateo de fechas usando UTC
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("es-ES", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    })
+    const date = new Date(dateString)
+    const day = date.getUTCDate().toString().padStart(2, "0")
+    const month = (date.getUTCMonth() + 1).toString().padStart(2, "0")
+    const year = date.getUTCFullYear()
+    return `${day}/${month}/${year}`
   }
 
   const formatTime = (timeString) => {
-    return new Date(timeString).toLocaleTimeString("es-ES", {
-      hour: "2-digit",
-      minute: "2-digit",
-    })
+    const date = new Date(timeString)
+    const hours = date.getUTCHours().toString().padStart(2, "0")
+    const minutes = date.getUTCMinutes().toString().padStart(2, "0")
+    return `${hours}:${minutes}`
   }
 
   const getStateColor = (state) => {

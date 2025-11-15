@@ -119,14 +119,13 @@ export async function createAppointment(req, res) {
   try {
     const userId = req.user.userId
     const { appointment_date, start_hour, serviceId } = req.body
-    console.log(appointment_date)
 
     if (!appointment_date || start_hour == null) {
       return res.status(400).json({ message: "Falta fecha u hora de la cita" })
     }
 
     const [year, month, day] = appointment_date.split("-").map(Number)
-    const startTime = new Date(year, month - 1, day, start_hour, 0, 0, 0)
+    const startTime = new Date(Date.UTC(year, month - 1, day, start_hour, 0, 0))
     const endTime = new Date(startTime.getTime() + 59 * 60 * 1000)
 
     const newAppointment = await prisma.appointment.create({
@@ -140,6 +139,8 @@ export async function createAppointment(req, res) {
       }
     })
 
+    console.log(newAppointment)
+
     return res.status(201).json(newAppointment)
   } catch (error) {
     console.error('ERROR createAppointment:', error)
@@ -149,8 +150,6 @@ export async function createAppointment(req, res) {
     })
   }
 }
-
-
 
 export async function updateAppointment(req, res) {
     try {
