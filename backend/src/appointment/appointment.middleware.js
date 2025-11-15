@@ -11,12 +11,13 @@ export async function checkAppointmentConflict(req, res, next) {
     }
 
     const newStartTime = new Date(start_time)
+
     const newEndTime = addMinutes(newStartTime, 59)
 
     const conflictQuery = {
       end_time: { gt: newStartTime },
       start_time: { lt: newEndTime },
-      state: { not: "CANCELLED"}
+      state: { not: "CANCELED"}
     }
 
     if (appointmentId) {
