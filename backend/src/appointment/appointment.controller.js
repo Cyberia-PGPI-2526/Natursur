@@ -1,4 +1,3 @@
-import { SessionType } from "@prisma/client"
 import { prisma } from "../config/db.js"
 
 export async function getMyAppointments(req, res) {
@@ -117,33 +116,40 @@ export async function getAppointment(req, res) {
 }
 
 export async function createAppointment(req, res) {
-    try {
-        const userId = req.user.userId
-        const { appointment_date, start_time, serviceId } = req.body
+  try {
+    const userId = req.user.userId
+    const { appointment_date, start_hour, serviceId } = req.body
+    console.log(appointment_date)
 
-        const [year, month, day] = appointment_date.split('-').map(Number)
-        const appointmentDateLocal = new Date(year, month - 1, day)
-
-        const startTime = new Date(start_time)
-        const endTime = addMinutes(startTime, 59)
-
-        const newAppointment = await prisma.appointment.create({
-            data: {
-                appointment_date: appointmentDateLocal,
-                start_time: startTime,
-                end_time: endTime,
-                clientId: req.user.userId,
-                serviceId: parseInt(serviceId),
-                session_type: "MIN_60"
-            }
-        })
-
-
-        return res.status(201).json(newAppointment)
-    } catch (error) {
-        return res.status(500).json({ message: "Error del servidor al crear la cita" })
+    if (!appointment_date || start_hour == null) {
+      return res.status(400).json({ message: "Falta fecha u hora de la cita" })
     }
+
+    const [year, month, day] = appointment_date.split("-").map(Number)
+    const startTime = new Date(year, month - 1, day, start_hour, 0, 0, 0)
+    const endTime = new Date(startTime.getTime() + 59 * 60 * 1000)
+
+    const newAppointment = await prisma.appointment.create({
+      data: {
+        appointment_date: startTime,
+        start_time: startTime,
+        end_time: endTime,
+        clientId: userId,
+        serviceId: parseInt(serviceId),
+        session_type: 'MIN_60'
+      }
+    })
+
+    return res.status(201).json(newAppointment)
+  } catch (error) {
+    console.error('ERROR createAppointment:', error)
+    return res.status(500).json({
+      message: 'Error del servidor al crear la cita',
+      error: error.message
+    })
+  }
 }
+
 
 
 export async function updateAppointment(req, res) {

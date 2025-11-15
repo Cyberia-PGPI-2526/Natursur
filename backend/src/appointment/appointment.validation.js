@@ -9,15 +9,24 @@ const timeCheck = (field) =>
     .toDate()
 
 export const createAppointmentValidation = [
-  timeCheck('appointment_date'),
-  timeCheck('start_time'),
+  check('appointment_date')
+    .exists()
+    .withMessage('appointment_date es requerido.'),
+
+  check('start_hour')
+    .exists()
+    .withMessage('start_hour es requerido.')
+    .isInt({ min: 0, max: 23 })
+    .withMessage('start_hour debe ser un número entre 0 y 23'),
+
   check('serviceId')
     .exists()
     .withMessage('serviceId es requerido.')
     .isInt({ gt: 0 })
-    .withMessage('serviceId debe ser un número entero positivo.')
-    .toInt(),
+    .withMessage('serviceId debe ser un número entero positivo')
+    .toInt()
 ]
+
 
 export const updateAppointmentValidation = [
   check('appointment_date')

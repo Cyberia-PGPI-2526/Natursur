@@ -69,7 +69,6 @@ export default function Availability() {
 
   const handleConfirm = async () => {
     setCreating(true)
-
     try {
       if (!selectedHour) {
         showTemporaryError("Selecciona una hora.")
@@ -77,31 +76,18 @@ export default function Availability() {
         return
       }
 
-      const [hour, minute] = selectedHour.split(":").map(Number)
+      const [year, month, day] = rawDate.split("-").map(Number)
+      const hour = parseInt(selectedHour.split(":")[0], 10)
 
-      const start = new Date(
-        selectedDate.getFullYear(),
-        selectedDate.getMonth(),
-        selectedDate.getDate(),
-        hour,
-        minute,
-        0,
-        0
-      )
-
-      if (isNaN(start)) {
-        showTemporaryError("Hora inválida.")
-        setCreating(false)
-        return
-      }
-
-      const appointmentDateISO = selectedDate.toISOString().split("T")[0]
+      const start = new Date(year, month - 1, day, hour, 0, 0, 0)
 
       const payload = {
-        appointment_date: appointmentDateISO,
-        start_time: start.toISOString(),
+        appointment_date: rawDate,
+        start_hour: hour,
         serviceId: parseInt(treatment)
       }
+
+      console.log(payload)
 
       const response = await createAppointment(payload)
 
@@ -119,6 +105,8 @@ export default function Availability() {
       setSelectedHour(null)
     }
   }
+
+
 
   return (
     <div className="max-w-md mx-auto mt-6 p-6 bg-white rounded-xl shadow-lg relative">
@@ -180,9 +168,8 @@ export default function Availability() {
                 setSelectedHour(hour)
                 setShowModal(true)
               }}
-              className={`w-full px-4 py-2 rounded font-medium transition text-center ${
-                treatment ? "bg-[#009BA6] text-white hover:bg-[#00777F]" : "bg-gray-300 text-gray-600 cursor-not-allowed"
-              }`}
+              className={`w-full px-4 py-2 rounded font-medium transition text-center ${treatment ? "bg-[#009BA6] text-white hover:bg-[#00777F]" : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                }`}
             >
               {hour}
             </button>
