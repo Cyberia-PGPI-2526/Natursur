@@ -47,7 +47,6 @@ async function main() {
 
   console.log('✅ Usuarios (Admin + 26 Clientes) creados')
 
-  // 🔹 Crear servicios
   const servicios = [
     {
       name: 'Masaje y Osteopatía',
@@ -193,6 +192,67 @@ async function main() {
   console.log('✅ Bloqueos de ejemplo creados')
   console.log('🎉 Seed completado correctamente')
 }
+
+const products = [
+  "Crema de Ojos Nutritiva de HL",
+  "Gel Limpiador Renovador de HL",
+  "Herbalife Gels CoQ10Vita",
+  "Herbalife Gels ViewVita",
+  "Rebuild Strength de Herbalife24",
+  "Loción Nutritiva para Manos y Cuerpo de HL/Skin",
+  "Serúm con 10% de Niacinamida de HL/Skin",
+  "Herbalife24 Prologn Gel Energético",
+  "Herbalife Gels MindVita Kids",
+  "Herbalife Gels NutrientVita Kids",
+  "Herbalife24 Creatine+",
+  "Bebida con Proteínas en Polvo",
+  "Collagen Skin Booster",
+  "Phyto Complete",
+  "Formula 1 Alimento Equilibrado",
+  "Avena, Manzana y Fibra",
+  "Bebida Instantánea de Extracto de Té con Plantas Aromáticas",
+  "Concentrado Herbal Aloe",
+  "Formula 3 Polvo de Proteínas",
+  "Herbalifeline Max",
+  "Desayuno Saludable",
+  "Gel de Baño para Manos y Cuerpo de Herbal Aloe",
+  "Protein Chips",
+  "AloeMax",
+  "Paquete de prueba",
+  "Champú Fortalecedor de Herbal Aloe",
+  "Barritas con Proteínas",
+  "Niteworks",
+  "Bebida Vegana con Proteínas en Polvo",
+  "Immune Booster",
+  "Hydrate de Herbalife24",
+  "Restore de Herbalife24",
+  "Formula 2 Complejo de vitaminas y minerales para mujer",
+  "Barrita de Proteínas Achieve de Herbalife24",
+  "Barritas Formula 1 Express",
+  "LiftOff",
+  "Crema Hidratante con FPS30",
+  "Loción de Manos y Cuerpo de Herbal Aloe",
+  "Crema Revitalizante de Noche de Herbalife SKIN",
+  "Mascarilla Purificante de Arcilla con Menta de Herbalife SKIN",
+  "Xtra-Cal",
+  "Night Mode",
+  "Formula 2 Complejo de vitaminas y minerales para hombre",
+  "Tri Blend Select",
+  "Active Mind Complex",
+  "Acondicionador Fortalecedor de Herbal Aloe",
+  "CR7 Drive de Herbalife24",
+  "High Protein Iced Coffe",
+  "Crema Tensora Ultimate"
+];
+
+ for (const name of products) {
+    await prisma.product.upsert({
+      where: { name },
+      update: {}, // si ya existe, no hace nada
+      create: { name }
+    });
+    console.log(`Seeded ${name} product.`);
+  }
 
 main()
   .then(async () => {
