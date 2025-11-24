@@ -8,7 +8,7 @@ import { authRoutes } from "./auth/auth.routes.js"
 import { appointmentRoutes } from "./appointment/appointment.route.js"
 import { serviceRoutes } from "./service/service.routes.js"
 import { availabilityRouter } from "./availability/availability.routes.js"
-import { orderRoutes } from "./order/order.routes.js"
+import { chatRoutes } from "./order/order.routes.js"
 
 
 export const app = express()
@@ -30,7 +30,7 @@ app.use('/api/v1/users', userRoutes)
 app.use('/api/v1/appointments', appointmentRoutes)
 app.use('/api/v1/services', serviceRoutes)
 app.use('/api/v1/availability', availabilityRouter)
-app.use('/api/v1/orders', orderRoutes)
+app.use('/api/v1/chat', chatRoutes)
 
 app.get('/api/v1/health', 
   async (req, res) => {
