@@ -104,7 +104,7 @@ async function extractOrder(message) {
     const extractionResponse = await openaiClient.responses.create({
         model: "gpt-5-nano",
         instructions: instructions,
-        input: message.message,
+        input: "This is the message you need to extract the products from" + message.message,
     });
 
     const extractedText = extractionResponse.output_text.trim();
