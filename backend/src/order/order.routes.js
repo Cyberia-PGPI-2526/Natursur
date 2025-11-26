@@ -1,11 +1,17 @@
 import express from 'express';
 import { requiresAuth, checkRole } from '../auth/auth.middleware.js';
-import { receiveMessage } from './order.controller.js';
+import { receiveMessage, receiveOrder } from './order.controller.js';
 
-export const orderRoutes = express.Router();
+export const chatRoutes = express.Router();
 
-orderRoutes.post('/message',
+chatRoutes.post('/message',
   requiresAuth,
   checkRole('CUSTOMER'),
   receiveMessage
+);
+
+chatRoutes.post('/order',
+  requiresAuth,
+  checkRole('CUSTOMER'),
+  receiveOrder
 );

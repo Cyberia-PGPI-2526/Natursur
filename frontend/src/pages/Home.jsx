@@ -1,6 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import fernandoImg from "../assets/conocer_fernando.png";
+import ChatbotSidebar from "../components/ChatbotSidebar";
+
 
 export default function Home() {
     const { token, role } = useAuthStore();
@@ -238,6 +240,8 @@ export default function Home() {
                     ) : null}
                 </div>
             </section>
+            {token && <ChatbotSidebar />}
+            
         </div>
     );
 }
