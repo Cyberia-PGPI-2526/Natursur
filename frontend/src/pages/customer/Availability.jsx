@@ -47,23 +47,50 @@ export default function Availability() {
     const fetchHours = async () => {
       setLoadingHours(true)
       setError("")
-      try {
-        const data = await getAvailableHours(rawDate)
-        if (data?.error) {
-          setError(data.error)
-          setHours([])
-        } else {
-          setHours(data.availableHours || [])
-        }
-      } catch {
-        setError("Error cargando horas")
+      const data = await getAvailableHours(date)
+
+      if (data.error) {
+        setError(data.error)
         setHours([])
-      } finally {
-        setLoadingHours(false)
+      } else {
+        const today = new Date()
+        const selected = new Date(date)
+
+        const isToday =
+          selected.getFullYear() === today.getFullYear() &&
+          selected.getMonth() === today.getMonth() &&
+          selected.getDate() === today.getDate()
+
+        let available = data.availableHours || []
+
+        // Filtrar horas pasadas si la fecha es hoy
+        if (isToday) {
+          const currentHour = today.getHours()
+          const currentMinutes = today.getMinutes()
+
+          available = available.filter(hour => {
+            const [h, m] = hour.split(":").map(Number)
+
+            if (h > currentHour) return true
+            if (h === currentHour && m > currentMinutes) return true
+            return false
+          })
+        }
+
+        setHours(available)
       }
+
+      setLoadingHours(false)
     }
+
     fetchHours()
-  }, [rawDate])
+  }, [date])
+
+
+  const showTemporaryError = (message) => {
+    setPopupError(message)
+    setTimeout(() => setPopupError(""), 3000)
+  }
 
   const handleConfirm = async () => {
     setCreating(true)

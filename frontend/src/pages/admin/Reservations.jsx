@@ -120,44 +120,46 @@ export default function Reservations() {
                   </td>
                 </tr>
               )}
-              {appointments.map((a, idx) => {
+              {appointments.map((a) => {
                 const date = new Date(a.appointment_date)
                 const start = new Date(a.start_time)
                 const end = new Date(a.end_time)
+
                 return (
                   <tr key={a.id} className="hover:bg-gray-50 transition">
                     <td className="py-4 px-6 text-gray-900 font-medium">
-                      {date.toLocaleDateString()}
+                      {date.toLocaleDateString("es-ES", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
                     </td>
                     <td className="py-4 px-6 text-gray-700">
-                      {start.toLocaleTimeString([], {
+                      {start.toLocaleTimeString("es-ES", {
                         hour: "2-digit",
                         minute: "2-digit",
                       })}
                     </td>
                     <td className="py-4 px-6 text-gray-700">
-                      {end.toLocaleTimeString([], {
+                      {end.toLocaleTimeString("es-ES", {
                         hour: "2-digit",
                         minute: "2-digit",
                       })}
                     </td>
                     <td className="py-4 px-6 text-gray-700">{a.client?.name}</td>
-                    <td className="py-4 px-6 text-gray-700">
-                      {a.service?.name}
-                    </td>
+                    <td className="py-4 px-6 text-gray-700">{a.service?.name}</td>
                     <td className="py-4 px-6">
                       <span
-                        className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                          a.state === "CONFIRMED"
+                        className={`px-3 py-1 rounded-full text-sm font-semibold ${a.state === "CONFIRMED"
                             ? "bg-green-100 text-green-700"
                             : a.state === "CANCELED"
-                            ? "bg-red-100 text-red-700"
-                            : a.state === "COMPLETED"
-                            ? "bg-blue-100 text-blue-700"
-                            : a.state === "NOT_ASSISTED"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-gray-100 text-gray-700"
-                        }`}
+                              ? "bg-red-100 text-red-700"
+                              : a.state === "COMPLETED"
+                                ? "bg-blue-100 text-blue-700"
+                                : a.state === "NOT_ASSISTED"
+                                  ? "bg-yellow-100 text-yellow-700"
+                                  : "bg-gray-100 text-gray-700"
+                          }`}
                       >
                         {a.state}
                       </span>

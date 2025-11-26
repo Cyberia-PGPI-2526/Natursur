@@ -19,6 +19,9 @@ import AdminCalendar from './pages/admin/Calendar'
 import Availability from './pages/customer/Availability'
 import MyAppointments from './pages/customer/MyAppointments'
 import Register from './pages/Register'
+import ChatbotSidebar from './components/ChatbotSidebar'
+import OrdersAdmin from './pages/admin/Orders'
+import MyOrders from './pages/customer/MyOrders'
 
 function App() {
   const { token, role } = useAuthStore()
@@ -47,6 +50,7 @@ function App() {
           <Route path='/services' element={<PrivateRoute><AdminServices /></PrivateRoute>} />
           <Route path='/products' element={<PrivateRoute><Products /></PrivateRoute>} />
           <Route path='/calendar' element={<PrivateRoute><AdminCalendar /></PrivateRoute>} />
+          <Route path='/orders' element={<PrivateRoute><OrdersAdmin /></PrivateRoute>} />
         </>
       )
       break
@@ -58,6 +62,7 @@ function App() {
           <Route path='/products' element={<PrivateRoute><Products /></PrivateRoute>} />
           <Route path='/reservations' element={<PrivateRoute><Login /></PrivateRoute>} />
           <Route path='/calendar' element={<PrivateRoute><AppCalendar /></PrivateRoute>} />
+          <Route path='/orders/me' element={<PrivateRoute><MyOrders /></PrivateRoute>} />
         </>
       )
       break
@@ -102,6 +107,7 @@ function App() {
           {privateRoutes}
           {publicRoutes}
         </Routes>
+        {token && role === 'CUSTOMER' && <ChatbotSidebar />}
       </main>
       <Footer />
     </div>
