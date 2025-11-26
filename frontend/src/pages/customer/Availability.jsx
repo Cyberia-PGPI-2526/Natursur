@@ -38,16 +38,44 @@ export default function Availability() {
       setLoadingHours(true)
       setError("")
       const data = await getAvailableHours(date)
+
       if (data.error) {
         setError(data.error)
         setHours([])
       } else {
-        setHours(data.availableHours || [])
+        const today = new Date()
+        const selected = new Date(date)
+
+        const isToday =
+          selected.getFullYear() === today.getFullYear() &&
+          selected.getMonth() === today.getMonth() &&
+          selected.getDate() === today.getDate()
+
+        let available = data.availableHours || []
+
+        // Filtrar horas pasadas si la fecha es hoy
+        if (isToday) {
+          const currentHour = today.getHours()
+          const currentMinutes = today.getMinutes()
+
+          available = available.filter(hour => {
+            const [h, m] = hour.split(":").map(Number)
+
+            if (h > currentHour) return true
+            if (h === currentHour && m > currentMinutes) return true
+            return false
+          })
+        }
+
+        setHours(available)
       }
+
       setLoadingHours(false)
     }
+
     fetchHours()
   }, [date])
+
 
   const showTemporaryError = (message) => {
     setPopupError(message)
