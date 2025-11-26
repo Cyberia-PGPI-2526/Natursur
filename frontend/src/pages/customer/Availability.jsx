@@ -5,9 +5,10 @@ import { getAvailableHours } from "../../service/availability.service"
 import { createAppointment } from "../../service/appointment.service"
 
 export default function Availability() {
-  const { date } = useParams()
+  const { date: rawDate } = useParams()
   const navigate = useNavigate()
-  const selectedDate = new Date(date)
+  const [year, month, day] = rawDate.split("-").map(Number)
+  const selectedDate = new Date(year, month - 1, day)
 
   const [hours, setHours] = useState([])
   const [loadingHours, setLoadingHours] = useState(true)
@@ -15,20 +16,29 @@ export default function Availability() {
   const [services, setServices] = useState([])
   const [loadingServices, setLoadingServices] = useState(true)
   const [error, setError] = useState("")
-
   const [selectedHour, setSelectedHour] = useState(null)
   const [showModal, setShowModal] = useState(false)
   const [creating, setCreating] = useState(false)
   const [popupError, setPopupError] = useState("")
 
+  const showTemporaryError = (message) => {
+    setPopupError(message)
+    setTimeout(() => setPopupError(""), 3000)
+  }
+
   useEffect(() => {
     const fetchServices = async () => {
       setLoadingServices(true)
       setError("")
-      const data = await getEnabledServices()
-      if (data.error) setError(data.error)
-      else setServices(data.services || [])
-      setLoadingServices(false)
+      try {
+        const data = await getEnabledServices()
+        if (data?.error) setError(data.error)
+        else setServices(data.services || [])
+      } catch (err) {
+        setError("Error cargando tratamientos")
+      } finally {
+        setLoadingServices(false)
+      }
     }
     fetchServices()
   }, [])
@@ -85,24 +95,28 @@ export default function Availability() {
   const handleConfirm = async () => {
     setCreating(true)
     try {
-      const [year, month, day] = date.split("-")
-      const start = new Date(year, month - 1, day, selectedHour, 0, 0, 0)
-      const end = new Date(start.getTime() + 60 * 60 * 1000)
+      if (!selectedHour) {
+        showTemporaryError("Selecciona una hora.")
+        setCreating(false)
+        return
+      }
 
       const payload = {
-        appointment_date: date,
-        start_time: startTime.toISOString(),
+        appointment_date: rawDate,
+        start_hour: parseInt(selectedHour.split(":")[0], 10),
         serviceId: parseInt(treatment)
       }
+
+      console.log(payload)
 
       const response = await createAppointment(payload)
 
       if (response?.error) {
-        showTemporaryError("Ocurrió un error al crear la cita.")
+        showTemporaryError(response.error || "Ocurrió un error al crear la cita.")
       } else {
         navigate("/appointments/me")
       }
-    } catch (err) {
+    } catch {
       showTemporaryError("Ocurrió un error al crear la cita.")
     } finally {
       setCreating(false)
@@ -118,6 +132,7 @@ export default function Availability() {
           {popupError}
         </div>
       )}
+
       <button
         onClick={() => navigate(-1)}
         className="mb-4 text-[#009BA6] font-medium hover:text-[#00777F] transition"
@@ -139,48 +154,18 @@ export default function Availability() {
         ) : error ? (
           <p className="text-red-500 text-sm">{error}</p>
         ) : (
-          <div className="relative">
-            <select
-              value={treatment}
-              onChange={(e) => setTreatment(e.target.value)}
-              className="
-                appearance-none
-                w-full p-3 pr-10
-                border border-gray-300
-                rounded-lg
-                bg-white
-                focus:outline-none
-                focus:ring-2 focus:ring-[#009BA6]
-                shadow-sm
-                hover:border-[#009BA6]
-                transition
-                cursor-pointer
-              "
-            >
-              <option value="">Selecciona un tratamiento</option>
-              {services.map((service) => (
-                <option key={service.id} value={service.id}>
-                  {service.name}
-                </option>
-              ))}
-            </select>
-
-            <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-              <svg
-                className="h-5 w-5 text-[#009BA6]"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </div>
-          </div>
+          <select
+            value={treatment}
+            onChange={(e) => setTreatment(e.target.value)}
+            className="appearance-none w-full p-3 pr-10 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#009BA6] shadow-sm hover:border-[#009BA6] cursor-pointer"
+          >
+            <option value="">Selecciona un tratamiento</option>
+            {services.map((service) => (
+              <option key={service.id} value={service.id}>
+                {service.name}
+              </option>
+            ))}
+          </select>
         )}
       </div>
 
@@ -190,9 +175,7 @@ export default function Availability() {
         ) : error ? (
           <p className="text-red-500 text-center">{error}</p>
         ) : hours.length === 0 ? (
-          <p className="text-gray-500 text-center">
-            No hay horas disponibles para este día.
-          </p>
+          <p className="text-gray-500 text-center">No hay horas disponibles para este día.</p>
         ) : (
           hours.map((hour) => (
             <button
@@ -202,9 +185,7 @@ export default function Availability() {
                 setSelectedHour(hour)
                 setShowModal(true)
               }}
-              className={`w-full px-4 py-2 rounded transition text-center font-medium ${treatment
-                ? "bg-[#009BA6] text-white hover:bg-[#00777F]"
-                : "bg-gray-300 text-gray-600 cursor-not-allowed"
+              className={`w-full px-4 py-2 rounded font-medium transition text-center ${treatment ? "bg-[#009BA6] text-white hover:bg-[#00777F]" : "bg-gray-300 text-gray-600 cursor-not-allowed"
                 }`}
             >
               {hour}
@@ -220,10 +201,8 @@ export default function Availability() {
               Confirmar cita
             </h3>
             <p className="text-gray-700 mb-4">
-              ¿Confirmas la reserva para las <b>{selectedHour}</b> el{" "}
-              {selectedDate.toLocaleDateString("es-ES")}?
+              ¿Confirmas la reserva para las <b>{selectedHour}</b> el {selectedDate.toLocaleDateString("es-ES")}?
             </p>
-
             <div className="flex justify-around">
               <button
                 onClick={handleConfirm}

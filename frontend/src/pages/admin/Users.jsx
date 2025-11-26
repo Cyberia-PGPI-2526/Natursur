@@ -88,10 +88,10 @@ export default function Users() {
   const handleEdit = async (user) => {
     setEditingUser(user)
     reset({
-      name: res.name,
-      email: res.email,
-      phoneNumber: res.phone_number || "",
-      role: res.role,
+      name: user.name,
+      email: user.email,
+      phoneNumber: user.phone_number || "",
+      role: user.role,
       password: ""
     })
     setIsModalOpen(true)

@@ -3,19 +3,22 @@ import { addMinutes } from "date-fns"
 
 export async function checkAppointmentConflict(req, res, next) {
   try {
-    const { start_time } = req.body
+    const { appointment_date, start_hour } = req.body
     const appointmentId = req.params.id ? parseInt(req.params.id) : null
 
-    if (!start_time) {
-      return res.status(400).json({ message: "Falta la hora de inicio" })
+    if (appointment_date === undefined || start_hour === undefined) {
+      return res.status(400).json({ message: "Faltan fecha o hora de inicio" })
     }
 
-    const newStartTime = new Date(start_time)
+    const [year, month, day] = appointment_date.split("-").map(Number)
+    // Convertimos a UTC para evitar desfase
+    const newStartTime = new Date(Date.UTC(year, month - 1, day, start_hour, 0, 0))
     const newEndTime = addMinutes(newStartTime, 59)
 
     const conflictQuery = {
       end_time: { gt: newStartTime },
       start_time: { lt: newEndTime },
+      state: { not: "CANCELED" }
     }
 
     if (appointmentId) {
@@ -23,21 +26,23 @@ export async function checkAppointmentConflict(req, res, next) {
     }
 
     const existingConflict = await prisma.appointment.findFirst({
-      where: conflictQuery,
+      where: conflictQuery
     })
 
     if (existingConflict) {
       return res.status(409).json({
-        message: "Este horario se solapa con otra cita existente.",
+        message: "Este horario se solapa con otra cita existente."
       })
     }
 
+    req.body.start_time = newStartTime
     req.body.end_time = newEndTime
 
     next()
   } catch (error) {
+    console.error(error)
     return res.status(500).json({
-      message: "Error verificando conflictos de citas",
+      message: "Error verificando conflictos de citas"
     })
   }
 }

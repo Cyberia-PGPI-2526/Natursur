@@ -1,4 +1,3 @@
-import { SessionType } from "@prisma/client"
 import { prisma } from "../config/db.js"
 
 export async function getMyAppointments(req, res) {
@@ -119,72 +118,85 @@ export async function getAppointment(req, res) {
 export async function createAppointment(req, res) {
   try {
     const userId = req.user.userId
-    const { appointment_date, start_time, end_time, serviceId } = req.body
+    const { appointment_date, start_hour, serviceId } = req.body
+
+    if (!appointment_date || start_hour == null) {
+      return res.status(400).json({ message: "Falta fecha u hora de la cita" })
+    }
+
+    const [year, month, day] = appointment_date.split("-").map(Number)
+    const startTime = new Date(Date.UTC(year, month - 1, day, start_hour, 0, 0))
+    const endTime = new Date(startTime.getTime() + 59 * 60 * 1000)
 
     const newAppointment = await prisma.appointment.create({
       data: {
-        appointment_date: new Date(appointment_date),
-        start_time: new Date(start_time),
-        end_time: new Date(end_time),
+        appointment_date: startTime,
+        start_time: startTime,
+        end_time: endTime,
         clientId: userId,
         serviceId: parseInt(serviceId),
-        session_type: "MIN_60"
+        session_type: 'MIN_60'
       }
     })
+
+    console.log(newAppointment)
 
     return res.status(201).json(newAppointment)
   } catch (error) {
-    return res.status(500).json({ message: "Error del servidor al crear la cita" })
+    console.error('ERROR createAppointment:', error)
+    return res.status(500).json({
+      message: 'Error del servidor al crear la cita',
+      error: error.message
+    })
   }
 }
 
-
 export async function updateAppointment(req, res) {
-  try {
-    const appointmentId = parseInt(req.params.id)
-    const loggedInUserId = req.user.userId
-    const loggedInUserRole = req.user.role
-    const { appointment_date, start_time, end_time, serviceId, state } = req.body
+    try {
+        const appointmentId = parseInt(req.params.id)
+        const loggedInUserId = req.user.userId
+        const loggedInUserRole = req.user.role
+        const { appointment_date, start_time, end_time, serviceId, state } = req.body
 
-    const appointment = await prisma.appointment.findUnique({
-      where: { id: appointmentId }
-    })
+        const appointment = await prisma.appointment.findUnique({
+            where: { id: appointmentId }
+        })
 
-    if (!appointment)
-      return res.status(404).json({ message: "Cita no encontrada" })
+        if (!appointment)
+            return res.status(404).json({ message: "Cita no encontrada" })
 
-    if (loggedInUserRole !== 'ADMIN' && appointment.clientId !== loggedInUserId) {
-      return res.status(403).json({ message: "Acceso denegado. Solo puedes actualizar tus propias citas." })
+        if (loggedInUserRole !== 'ADMIN' && appointment.clientId !== loggedInUserId) {
+            return res.status(403).json({ message: "Acceso denegado. Solo puedes actualizar tus propias citas." })
+        }
+
+        const dataToUpdate = {}
+
+        if (appointment_date) dataToUpdate.appointment_date = new Date(appointment_date)
+        if (start_time) dataToUpdate.start_time = new Date(start_time)
+        if (end_time) dataToUpdate.end_time = new Date(end_time)
+        if (serviceId) dataToUpdate.serviceId = parseInt(serviceId)
+
+        if (state) {
+            if (loggedInUserRole === 'ADMIN') {
+                dataToUpdate.state = state.toUpperCase()
+            } else {
+                return res.status(403).json({ message: "Acceso denegado. Solo los administradores pueden cambiar el estado de la cita." })
+            }
+        }
+
+        if (Object.keys(dataToUpdate).length === 0) {
+            return res.status(400).json({ message: "No se proporcionaron campos para actualizar" })
+        }
+
+        const updatedAppointment = await prisma.appointment.update({
+            where: { id: appointmentId },
+            data: dataToUpdate
+        })
+
+        return res.json({ message: "Cita actualizada correctamente", appointment: updatedAppointment })
+    } catch (error) {
+        return res.status(500).json({ message: "Error del servidor al actualizar la cita" })
     }
-
-    const dataToUpdate = {}
-
-    if (appointment_date) dataToUpdate.appointment_date = new Date(appointment_date)
-    if (start_time) dataToUpdate.start_time = new Date(start_time)
-    if (end_time) dataToUpdate.end_time = new Date(end_time)
-    if (serviceId) dataToUpdate.serviceId = parseInt(serviceId)
-
-    if (state) {
-      if (loggedInUserRole === 'ADMIN') {
-        dataToUpdate.state = state.toUpperCase()
-      } else {
-        return res.status(403).json({ message: "Acceso denegado. Solo los administradores pueden cambiar el estado de la cita." })
-      }
-    }
-
-    if (Object.keys(dataToUpdate).length === 0) {
-      return res.status(400).json({ message: "No se proporcionaron campos para actualizar" })
-    }
-
-    const updatedAppointment = await prisma.appointment.update({
-      where: { id: appointmentId },
-      data: dataToUpdate
-    })
-
-    return res.json({ message: "Cita actualizada correctamente", appointment: updatedAppointment })
-  } catch (error) {
-    return res.status(500).json({ message: "Error del servidor al actualizar la cita" })
-  }
 }
 
 
@@ -238,7 +250,7 @@ export async function confirmAppointment(req, res) {
 }
 
 export async function cancelAppointment(req, res) {
-  return setAppointmentState(req, res, 'CANCELED')
+    return setAppointmentState(req, res, 'CANCELED')
 }
 
 export async function completeAppointment(req, res) {
