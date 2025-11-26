@@ -81,7 +81,7 @@ export async function loginUser(req, res) {
 
         return res.json({ message: 'Login succesfully', token: accessToken, userId: user.id, role: user.role })
     } catch (error) {
-        return res.status(500).json({ message: 'Server error' })
+        return res.status(500).json({ message: 'Server error: ' + error.message })
     }
 }
 
@@ -126,7 +126,7 @@ export async function refreshToken(req, res) {
 
         return res.json({ token: accessToken, userId: user.id, role: user.role })
     } catch (error) {
-        return res.status(500).json({ message: "Server error" })
+        return res.status(500).json({ message: "Server error: " + error.message })
     }
 }
 
