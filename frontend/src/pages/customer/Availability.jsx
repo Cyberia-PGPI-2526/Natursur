@@ -21,11 +21,6 @@ export default function Availability() {
   const [creating, setCreating] = useState(false)
   const [popupError, setPopupError] = useState("")
 
-  const showTemporaryError = (message) => {
-    setPopupError(message)
-    setTimeout(() => setPopupError(""), 3000)
-  }
-
   useEffect(() => {
     const fetchServices = async () => {
       setLoadingServices(true)
