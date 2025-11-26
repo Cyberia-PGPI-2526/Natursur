@@ -42,14 +42,14 @@ export default function Availability() {
     const fetchHours = async () => {
       setLoadingHours(true)
       setError("")
-      const data = await getAvailableHours(date)
+      const data = await getAvailableHours(rawDate)
 
       if (data.error) {
         setError(data.error)
         setHours([])
       } else {
         const today = new Date()
-        const selected = new Date(date)
+        const selected = new Date(rawDate)
 
         const isToday =
           selected.getFullYear() === today.getFullYear() &&
@@ -79,7 +79,7 @@ export default function Availability() {
     }
 
     fetchHours()
-  }, [date])
+  }, [rawDate])
 
 
   const showTemporaryError = (message) => {
