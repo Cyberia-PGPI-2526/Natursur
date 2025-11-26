@@ -13,7 +13,7 @@ export default function Toast({ message, type = 'success', onClose, duration = 3
   const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ'
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 animate-slide-in-right">
+    <div className="fixed top-6 left-6 z-50 animate-slide-in-left">
       <div className={`${bgColor} text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px] max-w-md`}>
         <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/20 flex items-center justify-center font-bold">
           {icon}

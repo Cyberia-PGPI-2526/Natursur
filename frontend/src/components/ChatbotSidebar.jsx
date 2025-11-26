@@ -4,20 +4,22 @@ import Toast from "./Toast";
 
 export default function ChatbotSidebar() {
   const [isOpen, setIsOpen] = useState(true);
-  const [messages, setMessages] = useState([]); // { role: 'user'|'bot', text }
+  const [messages, setMessages] = useState([]); 
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [orderLoading, setOrderLoading] = useState(false);
   const [toast, setToast] = useState(null);
-  const [pendingProducts, setPendingProducts] = useState(null); // <-- new state
+  const [pendingProducts, setPendingProducts] = useState(null);
+  const [recording, setRecording] = useState(false)
   const listRef = useRef(null);
+  const recorderRef = useRef(null);
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, isOpen, pendingProducts]);
 
-  const handleSendMessage = async () => {
-    const text = input.trim();
+  const handleSendMessage = async (overrideText) => {
+    const text = (overrideText ?? input).trim();
     if (!text) return;
     setMessages((m) => [...m, { role: "user", text }]);
     setInput("");
@@ -74,6 +76,42 @@ export default function ChatbotSidebar() {
     setPendingProducts(null); // clear parsed products
     setToast({ message: "Conversación reiniciada", type: "info" });
   };
+
+  const startRecognition = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SpeechRecognition) {
+      setToast({ message: "Tu navegador no soporta reconocimiento de voz, solo es soportado por Google Chrome", type: "error" })
+      return
+    }
+    const rec = new SpeechRecognition()
+    recorderRef.current = rec
+    rec.lang = "es-ES"
+    rec.interimResults = false
+    rec.maxAlternatives = 1
+    rec.onresult = async (evt) => {
+      const text = evt.results[0][0].transcript
+      // append to input for UX
+      setInput((v) => (v ? v + " " + text : text))
+      // send directly using the transcribed text
+      await handleSendMessage(text)
+    }
+    rec.onerror = (e) => setToast({ message: "Error reconocimiento: " + e.error, type: "error" })
+    rec.onend = () => {
+      setRecording(false)
+      recorderRef.current = null
+    }
+    rec.start()
+    setRecording(true)
+  }
+
+  const stopRecognition = () => {
+    const rec = recorderRef.current
+    if (rec) {
+      try { rec.stop() } catch (e) { }
+      recorderRef.current = null
+    }
+    setRecording(false)
+  }
 
   return (
     <>
@@ -175,6 +213,11 @@ export default function ChatbotSidebar() {
                   className="bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition"
                 >
                   Cancelar
+                </button>
+
+                <button onClick={() => (recording ? stopRecognition() : startRecognition())}
+                  className="px-3 py-2 rounded-lg bg-green-100">
+                  {recording ? "Detener" : "🎤"}
                 </button>
               </div>
             </div>
