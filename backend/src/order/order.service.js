@@ -1,8 +1,6 @@
 import openaiClient from "../config/openai.js";
 import { prisma } from "../config/db.js";
 
-
-
 export async function processMessage(message) {
     const orderText = await extractOrder(message)
     const parsedProducts = orderText ? parseExtractedOrder(orderText) : null;

@@ -1,11 +1,12 @@
-import OpenAI from "openai";
+import OpenAI from "openai"
+import { OPENAI_API_KEY } from "./env.js"
 
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error("Missing OPENAI_API_KEY in environment");
+if (!OPENAI_API_KEY) {
+  throw new Error("Missing OPENAI_API_KEY in environment")
 }
 const options = {
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: OPENAI_API_KEY,
 }
-const openaiClient = new OpenAI(options);
+const openaiClient = new OpenAI(options)
 
-export default openaiClient;
+export default openaiClient
