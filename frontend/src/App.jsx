@@ -19,6 +19,7 @@ import AdminCalendar from './pages/admin/Calendar'
 import Availability from './pages/customer/Availability'
 import MyAppointments from './pages/customer/MyAppointments'
 import Register from './pages/Register'
+import ChatbotSidebar from './components/ChatbotSidebar'
 
 function App() {
   const { token, role } = useAuthStore()
@@ -102,6 +103,7 @@ function App() {
           {privateRoutes}
           {publicRoutes}
         </Routes>
+        {token && <ChatbotSidebar />}
       </main>
       <Footer />
     </div>
