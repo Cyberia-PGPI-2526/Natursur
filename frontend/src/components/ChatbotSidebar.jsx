@@ -149,14 +149,29 @@ export default function ChatbotSidebar() {
                   Escribe tu pedido o consulta. El asistente puede crear una orden desde la conversación.
                 </div>
               ) : (
-                messages.map((m, i) => (
-                  <div key={i} className={`max-w-[85%] ${m.role === "user" ? "ml-auto text-right" : "mr-auto text-left"}`}>
-                    <div className={`${m.role === "user" ? "bg-[#009BA6] text-white" : "bg-white border"} inline-block px-3 py-2 rounded-lg shadow-sm`}>
-                      <div className="text-sm">{m.text}</div>
+                <>
+                  {messages.map((m, i) => (
+                    <div key={i} className={`max-w-[85%] ${m.role === "user" ? "ml-auto text-right" : "mr-auto text-left"}`}>
+                      <div className={`${m.role === "user" ? "bg-[#009BA6] text-white" : "bg-white border"} inline-block px-3 py-2 rounded-lg shadow-sm`}>
+                        <div className="text-sm">{m.text}</div>
+                      </div>
+                      <div className="text-xs text-gray-400 mt-1">{m.role === "user" ? "Tú" : "Asistente"}</div>
                     </div>
-                    <div className="text-xs text-gray-400 mt-1">{m.role === "user" ? "Tú" : "Asistente"}</div>
-                  </div>
-                ))
+                  ))}
+
+                  {loading && (
+                    <div className={`max-w-[85%] mr-auto text-left`} aria-live="polite">
+                      <div className="typing-bubble">
+                        <span className="sr-only">Asistente está escribiendo...</span>
+                        <div className="typing-dots" aria-hidden="true">
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
