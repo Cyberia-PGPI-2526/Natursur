@@ -19,8 +19,8 @@ export default defineConfig({
         short_name: 'Natursur',
         start_url: '/',
         display: 'standalone',
-        background_color: '#2c2c2c',
-        theme_color: '#2c2c2c',
+        background_color: '#f2f2f2',
+        theme_color: '#e6e6e6',
         icons: [
           {
             src: '/icons/logo_natursur-192.png',
