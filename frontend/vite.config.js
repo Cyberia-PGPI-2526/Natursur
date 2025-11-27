@@ -23,12 +23,12 @@ export default defineConfig({
         theme_color: '#2c2c2c',
         icons: [
           {
-            src: '/icons/logo-natursur-192.png',
+            src: '/icons/logo_natursur-192.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: '/icons/logo-natursur-512.png',
+            src: '/icons/logo_natursur-512.png',
             sizes: '512x512',
             type: 'image/png'
           }
