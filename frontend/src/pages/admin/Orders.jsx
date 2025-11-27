@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import Toast from "../../components/Toast"
-import { getOrders } from "../../service/orders.service"
+import { getOrders, updateOrderStatus } from "../../service/orders.service"
 
 export default function OrdersAdmin() {
   const [orders, setOrders] = useState([])
@@ -57,9 +57,60 @@ export default function OrdersAdmin() {
 
   return (
     <div className="container mx-auto px-4 py-8 relative">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-[#009BA6]">Órdenes</h1>
-        <p className="text-gray-600 mt-2">Gestiona las órdenes de los clientes</p>
+      <div className="mb-8 flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-4xl font-bold text-[#009BA6]">Órdenes</h1>
+          <p className="text-gray-600 mt-2">Gestiona las órdenes de los clientes</p>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={async () => {
+              try {
+                setIsLoading(true)
+                // try to fetch many orders (adjust limit as needed)
+                const res = await getOrders(1, 1000)
+                const ordersToExport = res.orders || []
+
+                // build CSV
+                const headers = ["Order ID","Fecha","Cliente","Productos","Cantidad","Status"]
+                const rows = []
+                for (const o of ordersToExport) {
+                  // products as "name (qty); name2 (qty)"
+                  const prodStr = o.orderProducts.map(p => `${p.product.name} (${p.quantity})`).join(' ; ')
+                  rows.push([o.id, new Date(o.order_date).toLocaleString('es-ES'), o.user?.email || '', prodStr, '', o.status || ''])
+                }
+
+                const csvLines = [headers.join(',')]
+                for (const r of rows) {
+                  // escape double quotes
+                  const escaped = r.map(cell => `"${String(cell).replace(/"/g, '""')}"`)
+                  csvLines.push(escaped.join(','))
+                }
+
+                const csvContent = "\uFEFF" + csvLines.join('\n') // BOM for Excel
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `orders_export_${new Date().toISOString().slice(0,10)}.csv`
+                document.body.appendChild(a)
+                a.click()
+                a.remove()
+                URL.revokeObjectURL(url)
+
+                setToast({ message: 'Exportación iniciada (CSV)', type: 'success' })
+              } catch (err) {
+                console.error(err)
+                setToast({ message: 'Error exportando órdenes', type: 'error' })
+              } finally {
+                setIsLoading(false)
+              }
+            }}
+            className="px-4 py-2 bg-white border border-[#009BA6] text-[#009BA6] rounded-lg hover:bg-[#f0fbfb] transition font-semibold"
+          >
+            Exportar Excel (CSV)
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -70,6 +121,7 @@ export default function OrdersAdmin() {
                 <th className="py-4 px-6 text-left font-semibold">Cliente</th>
                 <th className="py-4 px-6 text-left font-semibold">Fecha</th>
                 <th className="py-4 px-6 text-left font-semibold">Productos</th>
+                <th className="py-4 px-6 text-left font-semibold">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -96,6 +148,25 @@ export default function OrdersAdmin() {
                         </li>
                       ))}
                     </ul>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={async () => {
+                          const res = await updateOrderStatus(order.id, 'READY')
+                          if (res?.error) {
+                            setToast({ message: res.error || 'Error actualizando estado', type: 'error' })
+                          } else {
+                            setToast({ message: 'Pedido marcado como listo', type: 'success' })
+                            setOrders((prev) => prev.map(o => o.id === order.id ? { ...o, status: 'READY' } : o))
+                          }
+                        }}
+                        className="px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                        disabled={order.status === 'READY'}
+                      >
+                        {order.status === 'READY' ? 'Listo' : 'Marcar listo'}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

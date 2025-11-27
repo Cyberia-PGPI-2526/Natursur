@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { requiresAuth, checkRole } from '../auth/auth.middleware.js';
-import { getMyOrders, getOrders, receiveMessage, receiveOrder } from './order.controller.js';
+import { getMyOrders, getOrders, receiveMessage, receiveOrder, updateOrderStatus } from './order.controller.js';
 
 export const chatRoutes = Router();
 export const ordersRoutes = Router();
@@ -27,5 +27,11 @@ ordersRoutes.get('',
   requiresAuth,
   checkRole('ADMIN'),
   getOrders
+);
+
+ordersRoutes.patch('/:id/status',
+  requiresAuth,
+  checkRole('ADMIN'),
+  updateOrderStatus
 );
 
