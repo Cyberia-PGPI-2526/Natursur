@@ -107,7 +107,7 @@ export default function ChatbotSidebar() {
   const stopRecognition = () => {
     const rec = recorderRef.current
     if (rec) {
-      try { rec.stop() } catch (e) { }
+      try { rec.stop() } catch (e) {  }
       recorderRef.current = null
     }
     setRecording(false)
@@ -131,7 +131,7 @@ export default function ChatbotSidebar() {
         </div>
 
         {isOpen && (
-          <div className="w-80 md:w-96 h-96 bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col">
+          <div className="w-80 md:w-96 h-[520px] md:h-[640px] bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col">
             <div className="px-4 py-3 bg-[#009BA6] text-white flex items-center justify-between">
               <div className="font-semibold">Asistente Natursur</div>
               <button
@@ -149,14 +149,29 @@ export default function ChatbotSidebar() {
                   Escribe tu pedido o consulta. El asistente puede crear una orden desde la conversación.
                 </div>
               ) : (
-                messages.map((m, i) => (
-                  <div key={i} className={`max-w-[85%] ${m.role === "user" ? "ml-auto text-right" : "mr-auto text-left"}`}>
-                    <div className={`${m.role === "user" ? "bg-[#009BA6] text-white" : "bg-white border"} inline-block px-3 py-2 rounded-lg shadow-sm`}>
-                      <div className="text-sm">{m.text}</div>
+                <>
+                  {messages.map((m, i) => (
+                    <div key={i} className={`max-w-[85%] ${m.role === "user" ? "ml-auto text-right" : "mr-auto text-left"}`}>
+                      <div className={`${m.role === "user" ? "bg-[#009BA6] text-white" : "bg-white border"} inline-block px-3 py-2 rounded-lg shadow-sm`}>
+                        <div className="text-sm">{m.text}</div>
+                      </div>
+                      <div className="text-xs text-gray-400 mt-1">{m.role === "user" ? "Tú" : "Asistente"}</div>
                     </div>
-                    <div className="text-xs text-gray-400 mt-1">{m.role === "user" ? "Tú" : "Asistente"}</div>
-                  </div>
-                ))
+                  ))}
+
+                  {loading && (
+                    <div className={`max-w-[85%] mr-auto text-left`} aria-live="polite">
+                      <div className="typing-bubble">
+                        <span className="sr-only">Asistente está escribiendo...</span>
+                        <div className="typing-dots" aria-hidden="true">
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
@@ -191,10 +206,11 @@ export default function ChatbotSidebar() {
                 disabled={loading || orderLoading}
               />
 
-              <div className="flex gap-2 mt-2">
+              {/* responsive buttons: stack full-width on small screens, equal width on sm+ */}
+              <div className="flex flex-wrap gap-2 mt-2">
                 <button
-                  onClick={handleSendMessage}
-                  className="flex-1 bg-[#009BA6] text-white px-3 py-2 rounded-lg hover:bg-[#007a82] transition disabled:opacity-60"
+                  onClick={() => handleSendMessage()}
+                  className="w-full sm:flex-1 h-10 flex items-center justify-center bg-[#009BA6] text-white px-3 rounded-lg hover:bg-[#007a82] transition disabled:opacity-60 min-w-0"
                   disabled={loading || orderLoading}
                 >
                   {loading ? "Enviando..." : "Enviar"}
@@ -202,7 +218,7 @@ export default function ChatbotSidebar() {
 
                 <button
                   onClick={handleSendOrder}
-                  className="bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600 transition disabled:opacity-60"
+                  className="w-full sm:flex-1 h-10 flex items-center justify-center bg-green-500 text-white px-3 rounded-lg hover:bg-green-600 transition disabled:opacity-60 min-w-0"
                   disabled={orderLoading || !pendingProducts || Object.keys(pendingProducts).length === 0}
                 >
                   {orderLoading ? "Enviando pedido..." : "Confirmar pedido"}
@@ -210,14 +226,17 @@ export default function ChatbotSidebar() {
 
                 <button
                   onClick={handleCancelOrder}
-                  className="bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition"
+                  className="w-full sm:flex-1 h-10 flex items-center justify-center bg-gray-100 text-gray-700 px-3 rounded-lg hover:bg-gray-200 transition min-w-0"
                 >
                   Cancelar
                 </button>
 
-                <button onClick={() => (recording ? stopRecognition() : startRecognition())}
-                  className="px-3 py-2 rounded-lg bg-green-100">
-                  {recording ? "Detener" : "🎤"}
+                <button
+                  onClick={() => (recording ? stopRecognition() : startRecognition())}
+                  className="w-full sm:flex-1 h-10 flex items-center justify-center rounded-lg bg-green-100 text-center min-w-0"
+                  aria-label={recording ? "Detener grabación" : "Iniciar grabación"}
+                >
+                  <span className="leading-none">{recording ? "■" : "🎤"}</span>
                 </button>
               </div>
             </div>

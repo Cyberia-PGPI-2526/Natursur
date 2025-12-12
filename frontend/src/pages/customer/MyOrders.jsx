@@ -63,9 +63,12 @@ export default function MyOrders() {
               <h2 className="text-lg font-semibold text-gray-800">
                 Pedido #{order.id}
               </h2>
-              <span className="text-gray-500 text-sm">
-                {formatDate(order.order_date)}
-              </span>
+              <div className="flex items-center gap-3">
+                <span className="text-gray-500 text-sm">{formatDate(order.order_date)}</span>
+                {order.status === 'READY' && (
+                  <span className="px-2 py-1 bg-green-100 text-green-800 rounded-md text-sm">Listo para recoger</span>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">

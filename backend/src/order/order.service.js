@@ -22,7 +22,17 @@ export async function processMessage(message) {
 
 async function extractOrder(message) {
 
-    const instructions = `Extract the order details from the following message. Have in mind that the products can be, if they the products you receive have similar names, choose the closest one:
+    const instructions = `You are extracting ordered products from a customer message.
+
+    IMPORTANT RULES:
+    1. The list below is the ONLY valid catalogue of products. Do NOT output items that do not appear in the customer message.
+    2. Do NOT assume the user ordered everything in the catalogue. Only return products that are explicitly mentioned.
+    3. Use similarity ONLY when the user writes a product name inexactly (e.g. “crema ojos nutritiva” → “Crema de Ojos Nutritiva de HL”). If the message does NOT reference a product in any form, do NOT include it.
+    4. If a product is not mentioned, ignore it completely.
+    5. If the message contains no valid products, return exactly: “No order details found”.
+
+    VALID PRODUCT CATALOGUE:
+
     - Crema de Ojos Nutritiva de HL
     - Gel Limpiador Renovador de HL
     - Herbalife Gels CoQ10Vita
@@ -96,15 +106,29 @@ async function extractOrder(message) {
     - High Protein Iced Coffe
     - Crema Tensora Ultimate
 
-    Extract the products and their quantities in the following format:
-    <Product Name>: <Quantity>, 
+    OUTPUT FORMAT:
     <Product Name>: <Quantity>,
-    If no products are found, respond with "No order details found".
-`;
+    <Product Name>: <Quantity>
+
+    EXAMPLES:
+
+    User message: “Quiero 2 cremas de ojos y 1 aloe”
+    Output:
+    Crema de Ojos Nutritiva de HL: 2,
+    Concentrado Herbal Aloe sabor Original: 1,
+
+    User message: “Hola, ¿me dices precios?”
+    Output:
+    No order details found.
+
+    User message: “Quiero proteína, creo que se llama formula uno vainilla”
+    Output:
+    Formula 1 Alimento Equilibrado sabor Crema de Vainilla: 1,
+    `;
     const extractionResponse = await openaiClient.responses.create({
         model: "gpt-5-nano",
         instructions: instructions,
-        input: message.message,
+        input: "This is the message you need to extract the products from" + message.message,
     });
 
     const extractedText = extractionResponse.output_text.trim();
